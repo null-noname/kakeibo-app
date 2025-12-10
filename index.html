@@ -236,6 +236,28 @@
         width: 100%; height: 80px; background: #000; color: #aaa; 
         border: 1px solid #555; font-size: 0.8em; margin-bottom: 10px; word-break: break-all; 
     }
+
+    /* 既存のスタイル全部... */
+
+    /* ここから追加 */
+    @media screen and (max-width: 480px) {
+        .summary-area {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .summary-item {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        input.summary-input {
+            width: 100%;
+            font-size: 1.2em;
+        }
+        .summary-label {
+            margin-right: 0;
+            margin-bottom: 2px;
+        }
+    }
 </style>
 </head>
 <body>
