@@ -1,39 +1,39 @@
-<！みかんむん HTML>
-<HTML サロン=「カツ」>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<サロンガンガンガンガンガン 相対=「んんん」 href=「マニフェト。JSON」>
-<ぎょろむ>
- す (「すんちゃん」 すんちゃん）{
- ・・・・・。サササ。すジスタ(「sw。js」);
+<link rel="manifest" href="manifest.json">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
   }
-</ぎょろむ>
-<メタ 文子・・・・・=「UTF-8」>
-<メタ 名前=「たんむん」 コガシラコガシラコガシラコガシラコガシラ=「幅=デバイス幅、初期スケール=1。0、最大スケール=1。0、たん=たんえ」>
-<サロン>家計簿 V5。04</サロン>
-<サササ>
- /* たんんくんくんくんくん
- 体 { 
- ササササ: サササササ
- ・・・・・・・:0；・・・・・・・:0; 
- 背景: #121212 
- 色: #e0e0e0; 
- 150px; 
- 60px; 
- ・・・・・選択:いし；
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>家計簿 V5.04</title>
+<style>
+    /* ダークモード配色 */
+    body { 
+        font-family: sans-serif;
+        margin: 0; padding: 0; 
+        background: #121212; 
+        color: #e0e0e0; 
+        padding-bottom: 150px; 
+        padding-top: 60px; 
+        user-select: none;
     }
 
- /* --- むしリトプバー --- */
- 。{
- 位置: 固定;
- ・・・・・:0； 左:0； 幅:100%； たた:50px;
- 背是: #1b5e20; 
- 表示: たんんんくんくん； たんんんくんくんくんくんくんくん: たんんんくんくんくんくんくんくんくん
- サロン: 0 15px;
- みしょんちゃん:みしょんちゃん；
- ・ワスシャドウ: 0 2px 5px rgba(0,0,0,0。5);
- zタタタ: 100;
+    /* --- アプリトップバー --- */
+    .app-bar {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 50px;
+        background: #1b5e20; 
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 15px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        z-index: 100;
     }
- 。アプリレン { フラレン: 大胆な； 色: #fff; フラレン: 1。1EM; }
+    .app-title { font-weight: bold; color: #fff; font-size: 1.1em; }
     .hamburger-btn {
         background: transparent; border: none; color: #fff;
         font-size: 1.8em; cursor: pointer; padding: 5px;
@@ -619,5 +619,4 @@
     render();
 </script>
 </body>
-
 </html>
