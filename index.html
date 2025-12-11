@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>kakeibo_V7.02</title>
+<title>家計簿</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
     /* ----------------------------------------------------
-       デザインスタイル (V7.02 全文表示＆編集モード切替版)
+       デザインスタイル (V7.03 全文表示＆編集モード切替版)
        ---------------------------------------------------- */
     body { 
         font-family: sans-serif; margin: 0; padding: 0; 
@@ -51,40 +51,29 @@
     .view-section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* --- ▼▼▼ メモ帳スタイル (V7.02 修正版) ▼▼▼ --- */
-    
-    /* 1. 閲覧モード（カード表示） */
+    /* --- ▼▼▼ メモ帳スタイル (V7.03 修正版) ▼▼▼ --- */
     .memo-card {
-        background: #202020; /* 閲覧モードの背景 */
-        border: 1px solid #333; border-radius: 8px;
+        background: #202020; border: 1px solid #333; border-radius: 8px;
         padding: 15px; margin-bottom: 20px;
         box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-    
     .memo-card-header {
         display: flex; justify-content: space-between; align-items: center;
         border-bottom: 1px dashed #444; padding-bottom: 10px; margin-bottom: 10px;
     }
-    
-    .memo-card-title { 
-        font-weight: bold; color: #81c784; font-size: 1.2em; 
-    }
-    
+    .memo-card-title { font-weight: bold; color: #81c784; font-size: 1.2em; }
     .btn-edit-mode {
         background: #333; color: #fff; 
         border: 1px solid #555; border-radius: 4px;
         padding: 6px 12px; font-size: 0.9em; cursor: pointer;
     }
-
     .memo-card-body {
-        font-family: 'Consolas', 'Monaco', monospace; /* 等幅フォント */
+        font-family: 'Consolas', 'Monaco', monospace; 
         color: #e0e0e0; font-size: 1.05em; 
-        line-height: 1.6;
-        white-space: pre-wrap; /* 改行をそのまま表示 */
-        word-break: break-all;
+        line-height: 1.6; white-space: pre-wrap; word-break: break-all;
     }
 
-    /* 2. 編集モード（Win11メモ帳風・全画面） */
+    /* 編集モード */
     #memo-editor { 
         display: none; 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -93,32 +82,25 @@
         flex-direction: column;
     }
     #memo-editor.active { display: flex; }
-
     .editor-toolbar { 
         display: flex; justify-content: space-between; align-items: center;
         padding: 10px 15px; background: #202020; border-bottom: 1px solid #333;
     }
-    
     input.memo-title-input { 
         width: 100%; background: transparent; border: none;
         color: #fff; font-size: 1.2em; font-weight: bold;
-        padding: 10px 15px; border-bottom: 1px solid #333;
-        outline: none;
+        padding: 10px 15px; border-bottom: 1px solid #333; outline: none;
     }
-    
     textarea.memo-body { 
         flex: 1; width: 100%; 
-        background: #272727; /* 編集画面は少し明るいグレー */
-        color: #f0f0f0; 
+        background: #272727; color: #f0f0f0; 
         border: none; padding: 15px; 
-        font-size: 16px; 
-        line-height: 1.6; 
+        font-size: 16px; line-height: 1.6; 
         font-family: 'Consolas', 'Monaco', monospace;
-        resize: none; outline: none;
-        box-sizing: border-box;
+        resize: none; outline: none; box-sizing: border-box;
     }
 
-    /* --- 以下、共通・家計簿スタイル --- */
+    /* --- 家計簿スタイル --- */
     h2 { font-size: 1.2em; border-left: 6px solid #2e7d32; padding-left: 10px; margin: 20px 0 10px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
     .btn-red { background: #c62828; color: #fff; border: 1px solid #e57373; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
@@ -140,25 +122,20 @@
     input.summary-input { text-align: right; color: #80d8ff; width: 120px; height: 2.5em; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 6px; font-size: 1.3em; background: #333; border: 1px solid #555; border-radius: 4px; }
     @media screen and (max-width: 480px) { input.summary-input { width: 100%; font-size: 1.2em; } }
     
-    /* 家計簿レイアウト */
     #annual-section { background: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333; }
     .annual-group { margin-bottom: 30px; } 
     .annual-header { font-weight: bold; color: #fff; border-bottom: 2px solid #2e7d32; margin-bottom: 10px; padding-bottom: 2px; font-size: 1.2em; display: flex; justify-content: space-between; align-items: center; }
     .year-controls { background: #1f1f1f; padding: 10px; margin: 15px 0; border-radius: 5px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
     select { font-size: 1.2em; padding: 5px; background: #333; color: #fff; border: 1px solid #555; }
-    
     .month-selector { display: flex; overflow-x: auto; background: #000; margin-bottom: 15px; border: 1px solid #333; padding: 5px 0; }
     .month-btn { flex: 0 0 auto; padding: 12px 18px; color: #888; border-right: 1px solid #222; cursor: pointer; }
     .month-btn.active { background: #2e7d32; color: #fff; font-weight: bold; border: 1px solid #fff; border-radius: 2px; }
-    
     .category-block { background: #1e1e1e; padding: 10px; margin-bottom: 25px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #333; }
     .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2c2c2c; padding: 8px; border-radius: 3px; border: 1px solid #444; }
     .cat-title-input { font-weight: bold; border: none !important; background: transparent !important; font-size: 1.4em; width: 60%; color: #fff; padding: 0; }
-    
     .summary-area { display: flex; align-items: center; justify-content: space-around; background: #252525; padding: 10px 5px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #383838; }
     .summary-item { display: flex; align-items: center; }
     .summary-label { font-size: 1.1em; color: #ccc; margin-right: 10px; white-space: nowrap; }
-    
     table { width: 100%; border-collapse: separate; border-spacing: 0 8px; table-layout: fixed; font-size: 1em; }
     th { color: #aaa; font-weight: normal; font-size: 0.9em; text-align: center; padding-bottom: 2px; }
     td { vertical-align: top; padding: 0 1px; }
@@ -176,14 +153,13 @@
         .summary-label { margin-right: 0; margin-bottom: 2px; }
     }
     
-    /* ステータス表示 */
     #sync-status { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#aaa; background:#222; padding:4px 8px; border-radius:4px; opacity:0.7; z-index:9999; }
 </style>
 </head>
 <body>
 
 <div class="header-area">
-    <div class="app-title-bar">家計簿</div>
+    <div class="app-title-bar">家計簿 V7.03</div>
     <div class="top-tabs">
         <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
         <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
@@ -274,6 +250,17 @@
 <div id="sync-status">同期待機中...</div>
 
 <script>
+    // ▼▼▼ 【重要】古いService Workerを強制的に削除するコード ▼▼▼
+    if (window.navigator && navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister();
+                console.log("古いService Workerを削除しました");
+            }
+        });
+    }
+    // ▲▲▲ ここまで追加 ▲▲▲
+
     const firebaseConfig = {
         apiKey: "AIzaSyCT_VvEPzGCPRLLFnzQuwArsYn2JnUR_fg",
         authDomain: "kakeibo-app-92bb4.firebaseapp.com",
@@ -299,7 +286,6 @@
     let isDataLoaded = false;
     let editingMemoId = null;
 
-    // --- 同期ロジック ---
     dbRef.on('value', (snapshot) => {
         const val = snapshot.val();
         const statusEl = document.getElementById('sync-status');
@@ -320,12 +306,8 @@
         }
         
         isDataLoaded = true;
-        // 復元処理
         switchView(data.lastViewedTab || 'kakeibo');
-        // 編集中の場合はリストに戻さない
-        if(document.getElementById('memo-editor').classList.contains('active')) {
-            // 編集中なら何もしない
-        } else {
+        if(!document.getElementById('memo-editor').classList.contains('active')) {
             renderMemoList(); 
         }
         
@@ -350,12 +332,10 @@
         }
         dbRef.set(data).catch(err => {});
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
-        
         const el = document.getElementById('sync-status');
         if(el) el.innerText = "↑ 送信中...";
     }
 
-    // --- データ構造 ---
     function createNewYearData() {
         let months = {};
         for(let i=1; i<=12; i++){
@@ -373,29 +353,20 @@
         };
     }
 
-    // --- ビュー切り替え ---
     window.switchView = (viewName) => {
-        // メモ編集中にタブ切り替えたら閉じる
-        if(viewName !== 'memo') {
-            closeMemoEditor();
-        }
-
+        if(viewName !== 'memo') closeMemoEditor();
         ['memo','fixed','kakeibo','save'].forEach(v => {
             document.getElementById(`tab-${v}`).classList.remove('active');
             document.getElementById(`view-${v}`).classList.remove('active');
         });
         document.getElementById(`tab-${viewName}`).classList.add('active');
         document.getElementById(`view-${viewName}`).classList.add('active');
-        
         data.lastViewedTab = viewName; 
-        
         if(viewName === 'kakeibo' || viewName === 'fixed') renderKakeibo();
         if(viewName === 'memo') renderMemoList();
-        
         if(isDataLoaded) saveData();
     };
 
-    // --- メモ機能 (V7.02 全文表示版) ---
     window.addNewMemo = () => {
         const newId = Date.now().toString();
         data.freeMemos.push({ id: newId, title: "新規メモ", body: "" });
@@ -409,24 +380,17 @@
         data.freeMemos.forEach(memo => {
             const div = document.createElement('div');
             div.className = 'memo-card';
-            // 安全なテキスト表示のためにinnerTextを使う
-            
-            // ヘッダー（タイトル＋編集ボタン）
             const header = document.createElement('div');
             header.className = 'memo-card-header';
             header.innerHTML = `<span class="memo-card-title">${memo.title}</span>`;
-            
             const btn = document.createElement('button');
             btn.className = 'btn-edit-mode';
             btn.innerText = '✐ 編集';
             btn.onclick = () => openMemoEditor(memo.id);
             header.appendChild(btn);
-            
-            // 本文（全文表示）
             const body = document.createElement('div');
             body.className = 'memo-card-body';
-            body.innerText = memo.body; // ここで全文セット
-
+            body.innerText = memo.body; 
             div.appendChild(header);
             div.appendChild(body);
             container.appendChild(div);
@@ -437,10 +401,8 @@
         editingMemoId = id;
         const memo = data.freeMemos.find(m => m.id === id);
         if(!memo) return;
-        
         document.getElementById('memo-list-view').style.display = 'none';
         document.getElementById('memo-editor').classList.add('active');
-        
         document.getElementById('memo-edit-title').value = memo.title;
         document.getElementById('memo-edit-body').value = memo.body;
     };
@@ -474,7 +436,6 @@
         renderMemoList();
     };
 
-    // --- 家計簿・固定費 ロジック ---
     function renderKakeibo() {
         const yearSelect = document.getElementById('year-select');
         yearSelect.innerHTML = '';
@@ -515,7 +476,6 @@
         renderMonthlyBlocks(yearData, activeMonth);
     }
 
-    // --- 以下、既存の描画・操作関数 ---
     function renderAnnualTable(cid, list, key, mode) {
         const c=document.getElementById(cid); c.innerHTML='';
         const t=document.createElement('table');
@@ -678,7 +638,6 @@
     function autoResize(textarea) { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }
     function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
 
-    // --- 操作 ---
     window.toggleMainAnnual=()=>{data.showAnnual=!data.showAnnual;saveData();renderKakeibo()};
     window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);renderKakeibo()};
     window.togBk=(i, m)=>{const b=data.years[data.currentYear].months[m][i];b.isOpen=!b.isOpen;saveData();renderKakeibo()};
@@ -709,7 +668,6 @@
     window.addNewYear=()=>{const n=prompt("追加する西暦（例: 2026）");if(n&&!data.years[n]){const c=data.years[data.currentYear];const ny=createNewYearData();ny.annualYear=JSON.parse(JSON.stringify(c.annualYear));ny.annualMonth=JSON.parse(JSON.stringify(c.annualMonth));ny.isAnnualYearOpen=c.isAnnualYearOpen;ny.isAnnualMonthOpen=c.isAnnualMonthOpen;data.years[n]=ny;data.currentYear=n;saveData();renderKakeibo();alert(n+"年を追加しました")}else if(data.years[n])alert("その年は既にあります")};
     window.deleteYear=()=>{if(Object.keys(data.years).length<=1){alert("削除できません");return}if(confirm(data.currentYear+"年を削除しますか？")){delete data.years[data.currentYear];data.currentYear=Object.keys(data.years).sort()[0];saveData();renderKakeibo()}};
 
-    // 書き出し/読み込み
     window.openMenu = () => switchView('save');
     window.shareDataText = async () => {
         const str = JSON.stringify(data);
