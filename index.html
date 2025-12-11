@@ -3,36 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>kakeibo_V6.08</title>
+<title>kakeibo_V7.01</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
     /* ----------------------------------------------------
-       デザインスタイル (V6.08 スマホ対応版)
+       デザインスタイル (V7.01 上部タブ・独立メモ版)
        ---------------------------------------------------- */
     body { 
         font-family: sans-serif; margin: 0; padding: 0; 
         background: #121212; color: #e0e0e0; 
-        padding-bottom: 150px; 
-        padding-top: calc(60px + env(safe-area-inset-top)); 
+        padding-bottom: 50px; 
+        padding-top: calc(90px + env(safe-area-inset-top)); /* タブの分高さを確保 */
         user-select: none; 
     }
-    .app-bar {
+
+    /* --- ヘッダー＆タブエリア --- */
+    .header-area {
         position: fixed; top: 0; left: 0; width: 100%;
-        height: calc(50px + env(safe-area-inset-top));
+        background: #1b5e20; z-index: 1000;
         padding-top: env(safe-area-inset-top);
-        background: #1b5e20;
-        display: flex; align-items: center; justify-content: space-between;
-        padding-left: 15px; padding-right: 15px;
-        box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     }
-    /* タイトル文字 */
-    .app-title { font-weight: bold; color: #fff; font-size: 1.1em; }
+    .app-title-bar {
+        height: 30px; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; color: #81c784; font-size: 0.9em;
+    }
     
-    .hamburger-btn { background: transparent; border: none; color: #fff; font-size: 2.0em; cursor: pointer; padding: 10px; }
+    /* 上部タブ */
+    .top-tabs {
+        display: flex; width: 100%; height: 50px;
+        background: #1b5e20;
+    }
+    .tab-item {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        color: #a5d6a7; font-weight: bold; cursor: pointer;
+        border-bottom: 4px solid transparent;
+        transition: all 0.2s;
+        font-size: 1.05em;
+    }
+    .tab-item.active {
+        color: #fff;
+        border-bottom: 4px solid #fff;
+        background: rgba(255,255,255,0.1);
+    }
+
     .container { padding: 10px; max-width: 600px; margin: 0 auto; }
+
+    /* --- 画面切り替え --- */
+    .view-section { display: none; animation: fadeIn 0.2s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* --- メモ帳リストスタイル --- */
+    .memo-list-item {
+        background: #2a2a2a; border: 1px solid #444; border-radius: 5px;
+        padding: 15px; margin-bottom: 10px;
+        display: flex; justify-content: space-between; align-items: center;
+        cursor: pointer;
+    }
+    .memo-title-disp { font-weight: bold; color: #fff; font-size: 1.1em; }
+    .memo-date { font-size: 0.8em; color: #888; }
+    
+    /* メモ編集画面 */
+    #memo-editor { display: none; }
+    #memo-editor.active { display: block; }
+    .editor-toolbar { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    input.memo-title-input { width: 100%; margin-bottom: 10px; font-weight: bold; }
+    textarea.memo-body { 
+        width: 100%; height: 60vh; background: #1e1e1e; 
+        color: #eee; border: 1px solid #444; padding: 10px; 
+        font-size: 1.1em; line-height: 1.6; border-radius: 4px;
+        font-family: monospace;
+    }
+
+    /* --- 保存タブのスタイル --- */
+    .settings-menu {
+        background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333;
+        text-align: center;
+    }
+    
+    /* --- 共通パーツ --- */
     h2 { font-size: 1.2em; border-left: 6px solid #2e7d32; padding-left: 10px; margin: 20px 0 10px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
     .btn-red { background: #c62828; color: #fff; border: 1px solid #e57373; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
@@ -43,126 +96,147 @@
     .bg-red { background: #c62828; border: 1px solid #e57373; }
     .btn-toggle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; width: 34px; height: 34px; font-weight: bold; font-size: 1.2em; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; }
     .add-row-btn { width: 100%; padding: 10px; margin-top: 5px; background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; font-size: 1.1em; cursor: pointer; }
+    
     input, textarea { box-sizing: border-box; border: 1px solid #444; background: #2a2a2a; border-radius: 3px; color: #fff; font-size: 1.15em; padding: 2px; }
-    textarea { width: 100%; color: #eee; resize: none; min-height: 2.0em; vertical-align: middle; word-break: break-all; }
+    /* 家計簿用テキストエリア */
+    textarea.kakeibo-text { width: 100%; color: #eee; resize: none; min-height: 2.0em; vertical-align: middle; word-break: break-all; }
+    
     input { height: 2.0em; }
     input.day-input { text-align: center; width: 34px; font-family: monospace; font-weight: bold; padding: 2px 0; }
     input.date-input { text-align: center; width: 75px; font-family: monospace; font-weight: bold; }
     input.money-input { text-align: right; color: #80d8ff; width: 86px; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 4px; font-size: 1.05em; }
     input.summary-input { text-align: right; color: #80d8ff; width: 120px; height: 2.5em; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 6px; font-size: 1.3em; background: #333; border: 1px solid #555; border-radius: 4px; }
     @media screen and (max-width: 480px) { input.summary-input { width: 100%; font-size: 1.2em; } }
+    
+    /* 家計簿レイアウト */
     #annual-section { background: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333; }
     .annual-group { margin-bottom: 30px; } 
     .annual-header { font-weight: bold; color: #fff; border-bottom: 2px solid #2e7d32; margin-bottom: 10px; padding-bottom: 2px; font-size: 1.2em; display: flex; justify-content: space-between; align-items: center; }
     .year-controls { background: #1f1f1f; padding: 10px; margin: 15px 0; border-radius: 5px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
     select { font-size: 1.2em; padding: 5px; background: #333; color: #fff; border: 1px solid #555; }
+    
     .month-selector { display: flex; overflow-x: auto; background: #000; margin-bottom: 15px; border: 1px solid #333; padding: 5px 0; }
     .month-btn { flex: 0 0 auto; padding: 12px 18px; color: #888; border-right: 1px solid #222; cursor: pointer; }
     .month-btn.active { background: #2e7d32; color: #fff; font-weight: bold; border: 1px solid #fff; border-radius: 2px; }
+    
     .category-block { background: #1e1e1e; padding: 10px; margin-bottom: 25px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #333; }
     .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2c2c2c; padding: 8px; border-radius: 3px; border: 1px solid #444; }
     .cat-title-input { font-weight: bold; border: none !important; background: transparent !important; font-size: 1.4em; width: 60%; color: #fff; padding: 0; }
+    
     .summary-area { display: flex; align-items: center; justify-content: space-around; background: #252525; padding: 10px 5px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #383838; }
     .summary-item { display: flex; align-items: center; }
     .summary-label { font-size: 1.1em; color: #ccc; margin-right: 10px; white-space: nowrap; }
+    
     table { width: 100%; border-collapse: separate; border-spacing: 0 8px; table-layout: fixed; font-size: 1em; }
     th { color: #aaa; font-weight: normal; font-size: 0.9em; text-align: center; padding-bottom: 2px; }
     td { vertical-align: top; padding: 0 1px; }
-    .col-date-annual { width: 75px; } 
-    .col-date-month { width: 55px; } 
-    .col-money { width: 86px; } 
-    .col-del { width: 30px; }
+    .col-date-annual { width: 75px; } .col-date-month { width: 55px; } .col-money { width: 86px; } .col-del { width: 30px; }
     .add-block-area { text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 20px; }
     .big-btn { background: #2e7d32; color: #fff; padding: 14px 24px; border: 1px solid #4caf50; border-radius: 5px; font-size: 1.1em; margin: 5px; width: 85%; }
     .hidden { display: none !important; }
     .total-row td { vertical-align: middle; }
     .total-val-box { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; text-align: right; color: #fff; font-weight: bold; font-family: monospace; font-size: 1.05em; padding: 4px; height: 2.0em; display: flex; align-items: center; justify-content: flex-end; letter-spacing: -0.5px; }
     .total-label { text-align: center; font-weight: bold; color: #fff; background: transparent; border: none; font-size: 1.1em; }
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-    .modal-content { background: #222; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; border: 1px solid #444; box-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center; }
-    .modal-header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 20px; }
-    .modal-title { font-size: 1.2em; font-weight: bold; color: #fff; margin: 0; }
-    .modal-close-btn { background: transparent; border: none; color: #fff; font-size: 2em; line-height: 1; cursor: pointer; padding: 0 10px; }
-    .backup-textarea { width: 100%; height: 80px; background: #000; color: #aaa; border: 1px solid #555; font-size: 0.8em; margin-bottom: 10px; word-break: break-all; }
-    
-    /* ステータス表示 */
-    #sync-status { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#aaa; background:#222; padding:4px 8px; border-radius:4px; opacity:0.7; z-index:9999; }
 
     @media screen and (max-width: 480px) {
         .summary-area { flex-direction: column; align-items: flex-start; }
         .summary-item { width: 100%; margin-bottom: 8px; }
         .summary-label { margin-right: 0; margin-bottom: 2px; }
     }
+    
+    /* ステータス表示 */
+    #sync-status { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#aaa; background:#222; padding:4px 8px; border-radius:4px; opacity:0.7; z-index:9999; }
 </style>
 </head>
 <body>
 
-<div class="app-bar">
-    <div class="app-title">家計簿</div>
-    <button class="hamburger-btn" onclick="openMenu()">☰</button>
+<div class="header-area">
+    <div class="app-title-bar">家計簿 V7.01</div>
+    <div class="top-tabs">
+        <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
+        <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
+        <div class="tab-item active" onclick="switchView('kakeibo')" id="tab-kakeibo">💰 収支</div>
+        <div class="tab-item" onclick="switchView('save')" id="tab-save">💾 保存</div>
+    </div>
 </div>
 
 <div class="container">
-    <h2>
-        固定費
-        <button class="btn-toggle" onclick="toggleMainAnnual()" id="annual-main-toggle">－</button>
-    </h2>
-    <div id="annual-section">
-        <div class="annual-group">
-            <div class="annual-header">
-                <span>年間</span>
-                <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
-            </div>
-            <div id="content-annual-year">
-                <div id="annual-table-year"></div>
-                <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
-            </div>
+    
+    <div id="view-memo" class="view-section">
+        <div id="memo-list-view">
+            <button class="add-row-btn" onclick="addNewMemo()">＋ 新しいメモを追加</button>
+            <div id="memo-list-container" style="margin-top:15px;"></div>
         </div>
-        <div class="annual-group">
-            <div class="annual-header">
-                <span>月間</span>
-                <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
+        <div id="memo-editor">
+            <div class="editor-toolbar">
+                <button class="btn-green" onclick="closeMemoEditor()">＜ 戻る</button>
+                <button class="btn-red" onclick="deleteCurrentMemo()">削除</button>
             </div>
-            <div id="content-annual-month">
-                <div id="annual-table-month"></div>
-                <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+            <input type="text" id="memo-edit-title" class="memo-title-input" placeholder="タイトル" onblur="saveCurrentMemo()">
+            <textarea id="memo-edit-body" class="memo-body" placeholder="内容を入力..." onblur="saveCurrentMemo()"></textarea>
+        </div>
+    </div>
+
+    <div id="view-fixed" class="view-section">
+        <h2>固定費</h2>
+        <div id="annual-section">
+            <div class="annual-group">
+                <div class="annual-header">
+                    <span>年間</span>
+                    <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+                </div>
+                <div id="content-annual-year">
+                    <div id="annual-table-year"></div>
+                    <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
+                </div>
+            </div>
+            <div class="annual-group">
+                <div class="annual-header">
+                    <span>月間</span>
+                    <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
+                </div>
+                <div id="content-annual-month">
+                    <div id="annual-table-month"></div>
+                    <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="year-controls">
-        <select id="year-select" onchange="changeYear()"></select>
-        <div>
-            <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
-            <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
+    <div id="view-kakeibo" class="view-section active">
+        <div class="year-controls">
+            <select id="year-select" onchange="changeYear()"></select>
+            <div>
+                <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
+                <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
+            </div>
+        </div>
+
+        <div class="month-selector" id="month-tabs"></div>
+        <h2 id="monthly-header-title">1月の収支</h2> 
+        <div id="monthly-container"></div>
+
+        <div class="add-block-area">
+            <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
+            <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
         </div>
     </div>
 
-    <div class="month-selector" id="month-tabs"></div>
-    <h2 id="monthly-header-title">1月の収支</h2> 
-    <div id="monthly-container"></div>
-
-    <div class="add-block-area">
-        <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
-        <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
-    </div>
-</div>
-
-<div id="menu-modal" class="modal hidden">
-    <div class="modal-content">
-        <div class="modal-header-row">
-            <div class="modal-title">設定・データ移行</div>
-            <button class="modal-close-btn" onclick="closeMenu()">×</button>
+    <div id="view-save" class="view-section">
+        <div class="settings-menu">
+            <h2 style="border:none; justify-content:center;">データ管理</h2>
+            <p style="color:#aaa; font-size:0.9em; margin-bottom:15px; text-align:left;">
+                【書き出し】データを「文字」として保存・共有します。<br>
+                【読み込み】保存した文字を貼り付けて復元します。
+            </p>
+            <button class="btn-backup" onclick="shareDataText()">📤 データを書き出し (共有)</button>
+            <button class="btn-backup" style="background:#00695c; border-color:#00897b;" onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
+            <hr style="border:0; border-top:1px solid #444; margin:20px 0;">
+            <textarea id="backup-box" class="backup-textarea" placeholder="ここにデータを貼り付けて復元"></textarea>
+            <button class="btn-backup-sub" onclick="importDataFromText()">📂 データを復元 (読み込み)</button>
         </div>
-        <p style="color:#aaa; font-size:0.9em; margin-bottom:15px; text-align:left;">
-            【重要】データは自動でクラウド同期されますが、念のため手動バックアップも可能です。<br>
-        </p>
-        <button class="btn-backup" onclick="shareDataText()">📤 データ書き出し (テキスト)</button>
-        <button class="btn-backup" style="background:#00695c; border-color:#00897b;" onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
-        <hr style="border:0; border-top:1px solid #444; margin:15px 0;">
-        <textarea id="backup-box" class="backup-textarea" placeholder="ここにデータを貼り付けて復元"></textarea>
-        <button class="btn-backup-sub" onclick="importDataFromText()">📂 データ読み込み (復元)</button>
     </div>
+
 </div>
 
 <div id="sync-status">同期待機中...</div>
@@ -184,14 +258,14 @@
 
     const initialData = {
         currentYear: "2025",
-        lastViewedMonth: 1, 
-        showAnnual: true,
-        years: { "2025": createNewYearData() }
+        lastViewedTab: "kakeibo",
+        years: { "2025": createNewYearData() },
+        freeMemos: [] // 新しいメモ帳データ配列
     };
 
     let data = JSON.parse(JSON.stringify(initialData));
-    let currentMonth = 1;
     let isDataLoaded = false;
+    let editingMemoId = null;
 
     // --- 同期ロジック ---
     dbRef.on('value', (snapshot) => {
@@ -201,25 +275,26 @@
         if (val) {
             data = val; 
             if(!data.years) data = JSON.parse(JSON.stringify(initialData));
+            if(!data.freeMemos) data.freeMemos = [];
         } else {
             const local = localStorage.getItem('kakeiboDataV7_Backup');
             if(local) {
                 data = JSON.parse(local);
+                if(!data.freeMemos) data.freeMemos = [];
                 saveData(false);
             } else {
                 data = JSON.parse(JSON.stringify(initialData));
             }
         }
-        currentMonth = data.lastViewedMonth || 1;
+        
         isDataLoaded = true;
-        try {
-            render();
-            if(statusEl) {
-                statusEl.innerText = "● 同期完了";
-                setTimeout(() => { statusEl.innerText = ""; }, 2000);
-            }
-        } catch(e) {
-            console.error("Render Error:", e);
+        // 復元処理
+        switchView(data.lastViewedTab || 'kakeibo');
+        renderMemoList(); // メモ一覧更新
+        
+        if(statusEl) {
+            statusEl.innerText = "● 同期完了";
+            setTimeout(() => { statusEl.innerText = ""; }, 2000);
         }
     });
 
@@ -236,7 +311,6 @@
                 }
             });
         }
-        data.lastViewedMonth = currentMonth;
         dbRef.set(data).catch(err => {});
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
         
@@ -244,7 +318,7 @@
         if(el) el.innerText = "↑ 送信中...";
     }
 
-    // --- 基本機能 ---
+    // --- データ構造 ---
     function createNewYearData() {
         let months = {};
         for(let i=1; i<=12; i++){
@@ -257,59 +331,98 @@
         return {
             annualYear: [], annualMonth: [],
             isAnnualYearOpen: true, isAnnualMonthOpen: true,
+            activeMonth: 1, // 各年ごとに最後に開いた月を記憶
             months: months
         };
     }
 
-    window.openMenu = () => { document.getElementById('menu-modal').classList.remove('hidden'); document.getElementById('backup-box').value = ""; };
-    window.closeMenu = () => { document.getElementById('menu-modal').classList.add('hidden'); };
-    window.shareDataText = async () => {
-        const str = JSON.stringify(data);
-        if (navigator.share) { try { await navigator.share({ title: '家計簿バックアップ', text: str }); return; } catch (err) { } }
-        window.location.href = "mailto:?subject=家計簿バックアップ&body=" + encodeURIComponent(str);
-    };
-    window.exportDataToClipboard = () => {
-        const str = JSON.stringify(data);
-        const box = document.getElementById('backup-box');
-        box.value = str; box.select(); document.execCommand('copy');
-        alert("データをコピーしました！");
-    };
-    window.importDataFromText = () => {
-        const str = document.getElementById('backup-box').value.trim();
-        if(!str) { alert("ボックスにデータを貼り付けてください"); return; }
-        if(!confirm("現在のデータを上書きして復元し、クラウドに保存しますか？")) return;
-        try {
-            data = JSON.parse(str);
-            currentMonth = data.lastViewedMonth || 1;
-            saveData(); 
-            alert("復元し、同期しました！"); closeMenu();
-        } catch(e) { alert("データ形式が正しくありません"); }
+    // --- ビュー切り替え ---
+    window.switchView = (viewName) => {
+        // タブの表示切り替え
+        ['memo','fixed','kakeibo','save'].forEach(v => {
+            document.getElementById(`tab-${v}`).classList.remove('active');
+            document.getElementById(`view-${v}`).classList.remove('active');
+        });
+        document.getElementById(`tab-${viewName}`).classList.add('active');
+        document.getElementById(`view-${viewName}`).classList.add('active');
+        
+        data.lastViewedTab = viewName; // タブ状態保存
+        
+        // 収支タブが開かれたら描画
+        if(viewName === 'kakeibo' || viewName === 'fixed') {
+            renderKakeibo();
+        }
+        if(viewName === 'memo') {
+            renderMemoList();
+        }
+        
+        // 保存は頻繁にさせない（タブ切り替え自体は軽いので）
+        if(isDataLoaded) saveData();
     };
 
-    function formatDateAnnual(val) {
-        const nums = val.replace(/[^0-9]/g, '');
-        if (nums.length === 4) return parseInt(nums.slice(0,2)) + "/" + parseInt(nums.slice(2,4));
-        if (nums.length === 3) return parseInt(nums.slice(0,1)) + "/" + parseInt(nums.slice(1,3));
-        return val;
-    }
-    function autoResize(textarea) { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }
-    function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
+    // --- メモ機能 (Win11風・自由追加) ---
+    window.addNewMemo = () => {
+        const newId = Date.now().toString();
+        data.freeMemos.push({ id: newId, title: "新規メモ", body: "" });
+        saveData();
+        openMemoEditor(newId);
+    };
 
-    function updateTotalDisplay(bIdx) {
-        if(!data.years[data.currentYear] || !data.years[data.currentYear].months[currentMonth]) return;
-        const block = data.years[data.currentYear].months[currentMonth][bIdx];
-        let s1=0, s2=0;
-        const items = block.items || [];
-        if(block.type === 'standard') { items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); }); } 
-        else { items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); }); }
-        const el1 = document.getElementById(`t1-${bIdx}`);
-        const el2 = document.getElementById(`t2-${bIdx}`);
-        if(el1) el1.innerText = formatNum(s1);
-        if(el2) el2.innerText = formatNum(s2);
-    }
+    window.renderMemoList = () => {
+        const container = document.getElementById('memo-list-container');
+        container.innerHTML = '';
+        data.freeMemos.forEach(memo => {
+            const div = document.createElement('div');
+            div.className = 'memo-list-item';
+            div.onclick = () => openMemoEditor(memo.id);
+            div.innerHTML = `<span class="memo-title-disp">${memo.title}</span><span class="memo-date">編集 ></span>`;
+            container.appendChild(div);
+        });
+    };
 
-    function render() {
-        if(!isDataLoaded) return; 
+    window.openMemoEditor = (id) => {
+        editingMemoId = id;
+        const memo = data.freeMemos.find(m => m.id === id);
+        if(!memo) return;
+        
+        document.getElementById('memo-list-view').style.display = 'none';
+        document.getElementById('memo-editor').classList.add('active');
+        
+        document.getElementById('memo-edit-title').value = memo.title;
+        document.getElementById('memo-edit-body').value = memo.body;
+    };
+
+    window.closeMemoEditor = () => {
+        saveCurrentMemo(); // 閉じる前に保存
+        editingMemoId = null;
+        document.getElementById('memo-editor').classList.remove('active');
+        document.getElementById('memo-list-view').style.display = 'block';
+        renderMemoList();
+    };
+
+    window.saveCurrentMemo = () => {
+        if(!editingMemoId) return;
+        const memo = data.freeMemos.find(m => m.id === editingMemoId);
+        if(memo) {
+            memo.title = document.getElementById('memo-edit-title').value;
+            memo.body = document.getElementById('memo-edit-body').value;
+            saveData();
+        }
+    };
+
+    window.deleteCurrentMemo = () => {
+        if(!confirm("このメモを削除しますか？")) return;
+        data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId);
+        saveData();
+        editingMemoId = null;
+        document.getElementById('memo-editor').classList.remove('active');
+        document.getElementById('memo-list-view').style.display = 'block';
+        renderMemoList();
+    };
+
+    // --- 家計簿・固定費 ロジック ---
+    function renderKakeibo() {
+        // 年プルダウン
         const yearSelect = document.getElementById('year-select');
         yearSelect.innerHTML = '';
         const sortedYears = Object.keys(data.years).sort();
@@ -323,9 +436,11 @@
         });
 
         const yearData = data.years[data.currentYear];
-        const annualSec = document.getElementById('annual-section');
-        const toggleBtn = document.getElementById('annual-main-toggle');
-        if(data.showAnnual){ annualSec.classList.remove('hidden'); toggleBtn.innerText="－"; } else { annualSec.classList.add('hidden'); toggleBtn.innerText="＋"; }
+        
+        // ★重要: その年の「最後に開いていた月」を復元（なければ1月）
+        let activeMonth = yearData.activeMonth || 1;
+        
+        // 固定費エリア
         const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
         if(yearData.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
         const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
@@ -334,19 +449,24 @@
         renderAnnualTable('annual-table-year', yearData.annualYear, 'annualYear', 'yearMode');
         renderAnnualTable('annual-table-month', yearData.annualMonth, 'annualMonth', 'monthMode');
 
+        // 月タブ
         const tabs=document.getElementById('month-tabs'); tabs.innerHTML='';
         for(let i=1; i<=12; i++){ 
             const d=document.createElement('div'); 
-            d.className=`month-btn ${currentMonth===i?'active':''}`;
+            d.className=`month-btn ${activeMonth===i?'active':''}`;
             d.innerText=i+"月"; 
-            d.onclick=()=>{ currentMonth=i; saveData(); render(); }; 
+            d.onclick=()=>{ 
+                yearData.activeMonth = i; // ★月を保存
+                saveData(); 
+                renderKakeibo(); 
+            }; 
             tabs.appendChild(d);
         }
-        document.getElementById('monthly-header-title').innerText = `${currentMonth}月の収支`;
-        renderMonthlyBlocks(yearData);
+        document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`;
+        renderMonthlyBlocks(yearData, activeMonth);
     }
 
-    // --- 高速化のため、cb(保存)をoninputからonblur/onchangeに移動 ---
+    // --- 以下、既存の描画・操作関数（変更なし） ---
     function renderAnnualTable(cid, list, key, mode) {
         const c=document.getElementById(cid); c.innerHTML='';
         const t=document.createElement('table');
@@ -366,13 +486,13 @@
         t.appendChild(tb); c.appendChild(t);
     }
 
-    function renderMonthlyBlocks(yd) {
+    function renderMonthlyBlocks(yd, month) {
         const c=document.getElementById('monthly-container'); c.innerHTML='';
-        if(!yd.months[currentMonth]) yd.months[currentMonth] = [];
+        if(!yd.months[month]) yd.months[month] = [];
         
-        yd.months[currentMonth].forEach((b,bi)=>{
+        yd.months[month].forEach((b,bi)=>{
             const d=document.createElement('div'); d.className='category-block';
-            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value)"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi})">削除</button><button class="btn-toggle" onclick="togBk(${bi})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
+            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
             const contentDiv = document.createElement('div'); 
             if(b.isOpen===false) contentDiv.classList.add('hidden');
             
@@ -384,15 +504,13 @@
                 const item1 = document.createElement('div'); item1.className = 'summary-item';
                 const label1 = document.createElement('div'); label1.className = 'summary-label'; label1.innerText = '残高';
                 item1.appendChild(label1);
-                const balInp = createMon(b.balance, v=>updBkVal(bi, 'balance', v), null, true);
-                balInp.id = `balance-input-${currentMonth}-${bi}`;
+                const balInp = createMon(b.balance, v=>updBkVal(bi, 'balance', v, month), null, true);
                 item1.appendChild(balInp);
 
                 const item2 = document.createElement('div'); item2.className = 'summary-item';
                 const label2 = document.createElement('div'); label2.className = 'summary-label'; label2.innerText = '入れる額';
                 item2.appendChild(label2);
-                const depInp = createMon(b.deposit, v=>updBkVal(bi, 'deposit', v), null, true);
-                depInp.id = `deposit-input-${currentMonth}-${bi}`;
+                const depInp = createMon(b.deposit, v=>updBkVal(bi, 'deposit', v, month), null, true);
                 item2.appendChild(depInp);
                 summaryDiv.appendChild(item1); summaryDiv.appendChild(item2); contentDiv.appendChild(summaryDiv);
             }
@@ -407,19 +525,19 @@
             items.forEach((it,ii)=>{
                 const tr=document.createElement('tr');
                 const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
-                w.append(createInp(it.date, v=>updIt(bi,ii,'date',v), 'day'), createSuf("日")); tdD.appendChild(w);
-                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v)));
+                w.append(createInp(it.date, v=>updIt(bi,ii,'date',v,month), 'day'), createSuf("日")); tdD.appendChild(w);
+                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v,month)));
                 tr.append(tdD, tdN);
                 if(b.type==='standard'){
-                    const td1=document.createElement('td'); td1.appendChild(createMon(it.plan, v=>updIt(bi,ii,'plan',v), ()=>updateTotalDisplay(bi)));
-                    const td2=document.createElement('td'); td2.appendChild(createMon(it.act, v=>updIt(bi,ii,'act',v), ()=>updateTotalDisplay(bi)));
+                    const td1=document.createElement('td'); td1.appendChild(createMon(it.plan, v=>updIt(bi,ii,'plan',v,month), ()=>updateTotalDisplay(bi,month)));
+                    const td2=document.createElement('td'); td2.appendChild(createMon(it.act, v=>updIt(bi,ii,'act',v,month), ()=>updateTotalDisplay(bi,month)));
                     tr.append(td1, td2);
                 } else {
-                    const td1=document.createElement('td'); td1.appendChild(createMon(it.out, v=>updIt(bi,ii,'out',v), ()=>updateTotalDisplay(bi)));
-                    const td2=document.createElement('td'); td2.appendChild(createMon(it.in, v=>updIt(bi,ii,'in',v), ()=>updateTotalDisplay(bi)));
+                    const td1=document.createElement('td'); td1.appendChild(createMon(it.out, v=>updIt(bi,ii,'out',v,month), ()=>updateTotalDisplay(bi,month)));
+                    const td2=document.createElement('td'); td2.appendChild(createMon(it.in, v=>updIt(bi,ii,'in',v,month), ()=>updateTotalDisplay(bi,month)));
                     tr.append(td1, td2);
                 }
-                const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="del-icon-btn" onclick="delIt(${bi},${ii})">×</button>`;
+                const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="del-icon-btn" onclick="delIt(${bi},${ii},${month})">×</button>`;
                 tr.appendChild(tdDel); tb.appendChild(tr); setTimeout(()=>autoResize(tdN.firstChild),0);
             });
 
@@ -433,24 +551,33 @@
                 trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td></td>`; 
             }
             tb.appendChild(trTotal); t.appendChild(tb); contentDiv.appendChild(t); 
-            const ab=document.createElement('button'); ab.className='add-row-btn'; ab.innerText='追加'; ab.onclick=()=>addIt(bi); 
+            const ab=document.createElement('button'); ab.className='add-row-btn'; ab.innerText='追加'; ab.onclick=()=>addIt(bi, month); 
             contentDiv.appendChild(ab);
             d.appendChild(contentDiv); c.appendChild(d);
         });
     }
 
-    // 【修正】数字入力：cb（保存）は onblur（入力を終えた時）だけ呼ぶ
+    function updateTotalDisplay(bIdx, month) {
+        const block = data.years[data.currentYear].months[month][bIdx];
+        let s1=0, s2=0;
+        const items = block.items || [];
+        if(block.type === 'standard') { items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); }); } 
+        else { items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); }); }
+        const el1 = document.getElementById(`t1-${bIdx}`);
+        const el2 = document.getElementById(`t2-${bIdx}`);
+        if(el1) el1.innerText = formatNum(s1);
+        if(el2) el2.innerText = formatNum(s2);
+    }
+
+    // --- 入力ヘルパー ---
     function createInp(val, cb, type) {
         const i=document.createElement('input'); i.value=val||"";
         if(type==='date') { 
             i.type="text"; i.className="date-input"; 
-            // 入力中は保存しない
             i.oninput=function(){}; 
             i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; 
-        }
-        else { 
+        } else { 
             i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); 
-            // 入力中は数字チェックだけ（保存しない）
             i.oninput=function(){
                 let v=this.value.replace(/[^0-9]/g,'');
                 if(Number(v)>31)v="31";
@@ -461,22 +588,16 @@
         return i;
     }
     function createSuf(t){const s=document.createElement('span');s.className="day-suffix";s.innerText=t;return s;}
-    
-    // 【修正】テキスト入力：cb（保存）は onblur だけ呼ぶ
     function createTxt(v,cb){
-        const t=document.createElement('textarea'); t.value=v||""; t.rows=1;
-        t.oninput=function(){ autoResize(this); }; // 高さ調整だけ
-        t.onblur=function(){ cb(this.value); };    // 保存は外れた時
+        const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.rows=1;
+        t.oninput=function(){ autoResize(this); }; 
+        t.onblur=function(){ cb(this.value); };
         return t;
     }
-    
-    // 【修正済み】金額入力：元々onblurなのでOK
     function createMon(v, cb, bCb, isBig = false){
         const i=document.createElement('input');
-        i.type="tel"; 
-        i.className = isBig ? "summary-input" : "money-input";
+        i.type="tel"; i.className = isBig ? "summary-input" : "money-input";
         i.value = (v === 0 || v === "0") ? "" : Number(v).toLocaleString();
-        
         i.onfocus=function(){ this.value=this.value.replace(/,/g,''); this.select(); };
         i.oninput=function(){
              let raw = this.value.replace(/[^0-9\-]/g, '');
@@ -500,31 +621,78 @@
         };
         return i;
     }
+    function formatDateAnnual(val) {
+        const nums = val.replace(/[^0-9]/g, '');
+        if (nums.length === 4) return parseInt(nums.slice(0,2)) + "/" + parseInt(nums.slice(2,4));
+        if (nums.length === 3) return parseInt(nums.slice(0,1)) + "/" + parseInt(nums.slice(1,3));
+        return val;
+    }
+    function autoResize(textarea) { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }
+    function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
 
     // --- 操作 ---
-    window.toggleMainAnnual=()=>{data.showAnnual=!data.showAnnual;saveData();render()};
-    window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);render()};
-    window.togBk=(i)=>{const b=data.years[data.currentYear].months[currentMonth][i];b.isOpen=!b.isOpen;saveData();render()};
-    window.addAnnualItem=(k)=>{const l=(k==='year'||k==='annualYear')?'annualYear':'annualMonth';data.years[data.currentYear][l].push({date:"",text:"",cost:0});saveData(true);render()};
+    window.toggleMainAnnual=()=>{data.showAnnual=!data.showAnnual;saveData();renderKakeibo()};
+    window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);renderKakeibo()};
+    window.togBk=(i, m)=>{const b=data.years[data.currentYear].months[m][i];b.isOpen=!b.isOpen;saveData();renderKakeibo()};
+    window.addAnnualItem=(k)=>{const l=(k==='year'||k==='annualYear')?'annualYear':'annualMonth';data.years[data.currentYear][l].push({date:"",text:"",cost:0});saveData(true);renderKakeibo()};
     window.updAnn=(l,i,k,v)=>{data.years[data.currentYear][l][i][k]=v;saveData(true)};
-    window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);render()};
-    window.addCategoryBlock=(t)=>{const T=t==='standard'?'リスト1':'リスト2';data.years[data.currentYear].months[currentMonth].push({type:t,title:T,isOpen:true,items:[], balance:0, deposit:0});saveData();render()};
-    window.delBk=(i)=>{if(confirm("削除しますか？")){data.years[data.currentYear].months[currentMonth].splice(i,1);saveData();render()}};
-    window.updBkTi=(i,v)=>{data.years[data.currentYear].months[currentMonth][i].title=v;saveData()};
-    window.updBkVal=(i,key,v)=>{data.years[data.currentYear].months[currentMonth][i][key]=v;saveData()};
+    window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);renderKakeibo()};
+    window.addCategoryBlock=(t)=>{
+        const T=t==='standard'?'リスト1':'リスト2';
+        // 現在開いている月にブロックを追加
+        const m = data.years[data.currentYear].activeMonth || 1;
+        data.years[data.currentYear].months[m].push({type:t,title:T,isOpen:true,items:[], balance:0, deposit:0});
+        saveData();renderKakeibo();
+    };
+    window.delBk=(i, m)=>{if(confirm("削除しますか？")){data.years[data.currentYear].months[m].splice(i,1);saveData();renderKakeibo()}};
+    window.updBkTi=(i,v, m)=>{data.years[data.currentYear].months[m][i].title=v;saveData()};
+    window.updBkVal=(i,key,v, m)=>{data.years[data.currentYear].months[m][i][key]=v;saveData()};
     
-    window.addIt=(i)=>{
-        const b=data.years[data.currentYear].months[currentMonth][i];
+    window.addIt=(i, m)=>{
+        const b=data.years[data.currentYear].months[m][i];
         if(!b.items) b.items = []; 
         if(b.type==='standard')b.items.push({date:"",name:"",plan:0,act:0});else b.items.push({date:"",name:"",out:0,in:0});
-        saveData();render();
+        saveData();renderKakeibo();
     };
     
-    window.updIt=(b,i,k,v)=>{data.years[data.currentYear].months[currentMonth][b].items[i][k]=v;saveData()};
-    window.delIt=(b,i)=>{data.years[data.currentYear].months[currentMonth][b].items.splice(i,1);saveData();render()};
-    window.changeYear=()=>{data.currentYear=document.getElementById('year-select').value;render()};
-    window.addNewYear=()=>{const n=prompt("追加する西暦（例: 2026）");if(n&&!data.years[n]){const c=data.years[data.currentYear];const ny=createNewYearData();ny.annualYear=JSON.parse(JSON.stringify(c.annualYear));ny.annualMonth=JSON.parse(JSON.stringify(c.annualMonth));ny.isAnnualYearOpen=c.isAnnualYearOpen;ny.isAnnualMonthOpen=c.isAnnualMonthOpen;data.years[n]=ny;data.currentYear=n;saveData();render();alert(n+"年を追加しました")}else if(data.years[n])alert("その年は既にあります")};
-    window.deleteYear=()=>{if(Object.keys(data.years).length<=1){alert("削除できません");return}if(confirm(data.currentYear+"年を削除しますか？")){delete data.years[data.currentYear];data.currentYear=Object.keys(data.years).sort()[0];saveData();render()}};
+    window.updIt=(b,i,k,v, m)=>{data.years[data.currentYear].months[m][b].items[i][k]=v;saveData()};
+    window.delIt=(b,i, m)=>{data.years[data.currentYear].months[m][b].items.splice(i,1);saveData();renderKakeibo()};
+    
+    window.changeYear=()=>{data.currentYear=document.getElementById('year-select').value;renderKakeibo()};
+    window.addNewYear=()=>{const n=prompt("追加する西暦（例: 2026）");if(n&&!data.years[n]){const c=data.years[data.currentYear];const ny=createNewYearData();ny.annualYear=JSON.parse(JSON.stringify(c.annualYear));ny.annualMonth=JSON.parse(JSON.stringify(c.annualMonth));ny.isAnnualYearOpen=c.isAnnualYearOpen;ny.isAnnualMonthOpen=c.isAnnualMonthOpen;data.years[n]=ny;data.currentYear=n;saveData();renderKakeibo();alert(n+"年を追加しました")}else if(data.years[n])alert("その年は既にあります")};
+    window.deleteYear=()=>{if(Object.keys(data.years).length<=1){alert("削除できません");return}if(confirm(data.currentYear+"年を削除しますか？")){delete data.years[data.currentYear];data.currentYear=Object.keys(data.years).sort()[0];saveData();renderKakeibo()}};
+
+    // 書き出し/読み込み
+    window.openMenu = () => switchView('save');
+    window.shareDataText = async () => {
+        const str = JSON.stringify(data);
+        if (navigator.share) { try { await navigator.share({ title: '家計簿バックアップ', text: str }); return; } catch (err) { } }
+        window.location.href = "mailto:?subject=家計簿バックアップ&body=" + encodeURIComponent(str);
+    };
+    window.exportDataToClipboard = () => {
+        const str = JSON.stringify(data);
+        const box = document.getElementById('backup-box');
+        box.value = str; box.select(); document.execCommand('copy');
+        alert("データをコピーしました！");
+    };
+    window.importDataFromText = () => {
+        const str = document.getElementById('backup-box').value.trim();
+        if(!str) { alert("ボックスにデータを貼り付けてください"); return; }
+        if(!confirm("現在のデータを上書きして復元し、クラウドに保存しますか？")) return;
+        try {
+            data = JSON.parse(str);
+            // データ構造補完
+            if(!data.freeMemos) data.freeMemos = [];
+            if(!data.years) data.years = { "2025": createNewYearData() };
+            Object.keys(data.years).forEach(y => {
+                if(!data.years[y].activeMonth) data.years[y].activeMonth = 1;
+            });
+            saveData(); 
+            isDataLoaded = true;
+            switchView('kakeibo');
+            alert("復元し、同期しました！");
+        } catch(e) { alert("データ形式が正しくありません"); }
+    };
 
     document.getElementById('sync-status').innerText = "接続中...";
 </script>
