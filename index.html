@@ -3,52 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>家計簿</title>
+<title>kakeibo_V6.08</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
     /* ----------------------------------------------------
-       デザインスタイル (V7.2 スマホのノッチ対応版)
+       デザインスタイル (V6.08 スマホ対応版)
        ---------------------------------------------------- */
     body { 
         font-family: sans-serif; margin: 0; padding: 0; 
         background: #121212; color: #e0e0e0; 
         padding-bottom: 150px; 
-        /* ヘッダーの高さに合わせて開始位置を調整 */
         padding-top: calc(60px + env(safe-area-inset-top)); 
         user-select: none; 
     }
-
-    /* --- アプリトップバー（ここを修正） --- */
     .app-bar {
-        position: fixed;
-        top: 0; left: 0; width: 100%;
-        /* スマホのステータスバーの分だけ高さを増やす */
+        position: fixed; top: 0; left: 0; width: 100%;
         height: calc(50px + env(safe-area-inset-top));
         padding-top: env(safe-area-inset-top);
-        
         background: #1b5e20;
         display: flex; align-items: center; justify-content: space-between;
-        
-        /* 左右の余白 */
         padding-left: 15px; padding-right: 15px;
-        
-        box-sizing: border-box;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        z-index: 1000; /* 重なり順を強化 */
+        box-sizing: border-box; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 1000;
     }
-
+    /* タイトル文字 */
     .app-title { font-weight: bold; color: #fff; font-size: 1.1em; }
     
-    /* ハンバーガーボタン（押しやすく少し大きく） */
-    .hamburger-btn { 
-        background: transparent; border: none; color: #fff; 
-        font-size: 2.0em; /* サイズアップ */
-        cursor: pointer; padding: 10px; /* タッチ範囲を広げる */
-    }
-
+    .hamburger-btn { background: transparent; border: none; color: #fff; font-size: 2.0em; cursor: pointer; padding: 10px; }
     .container { padding: 10px; max-width: 600px; margin: 0 auto; }
     h2 { font-size: 1.2em; border-left: 6px solid #2e7d32; padding-left: 10px; margin: 20px 0 10px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
@@ -115,7 +98,7 @@
 <body>
 
 <div class="app-bar">
-    <div class="app-title">クラウド家計簿</div>
+    <div class="app-title">家計簿</div>
     <button class="hamburger-btn" onclick="openMenu()">☰</button>
 </div>
 
@@ -185,9 +168,6 @@
 <div id="sync-status">同期待機中...</div>
 
 <script>
-    // =========================================================
-    // 1. Firebase 設定
-    // =========================================================
     const firebaseConfig = {
         apiKey: "AIzaSyCT_VvEPzGCPRLLFnzQuwArsYn2JnUR_fg",
         authDomain: "kakeibo-app-92bb4.firebaseapp.com",
@@ -198,12 +178,10 @@
         appId: "1:45651637804:web:f30ba95891d28538a14389"
     };
 
-    // Firebase 初期化
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const dbRef = db.ref('kakeiboData');
 
-    // --- データ構造初期値 ---
     const initialData = {
         currentYear: "2025",
         lastViewedMonth: 1, 
@@ -215,32 +193,25 @@
     let currentMonth = 1;
     let isDataLoaded = false;
 
-    // =========================================================
-    // 2. データ保存・同期ロジック
-    // =========================================================
-    
-    // 【読み込み】Firebaseの変更を検知して画面を更新
+    // --- 同期ロジック ---
     dbRef.on('value', (snapshot) => {
         const val = snapshot.val();
         const statusEl = document.getElementById('sync-status');
         
         if (val) {
-            data = val; // クラウドのデータで上書き
+            data = val; 
             if(!data.years) data = JSON.parse(JSON.stringify(initialData));
         } else {
-            // データが無い場合（初回など）はローカルを見る
             const local = localStorage.getItem('kakeiboDataV7_Backup');
             if(local) {
                 data = JSON.parse(local);
-                saveData(false); // クラウドに書き戻す
+                saveData(false);
             } else {
                 data = JSON.parse(JSON.stringify(initialData));
             }
         }
-        
         currentMonth = data.lastViewedMonth || 1;
         isDataLoaded = true;
-        
         try {
             render();
             if(statusEl) {
@@ -249,14 +220,11 @@
             }
         } catch(e) {
             console.error("Render Error:", e);
-            if(statusEl) statusEl.innerText = "× 描画エラー";
         }
     });
 
-    // 【保存】データ変更時に呼ばれる関数
     function saveData(syncAnnual = false) {
         if(!isDataLoaded) return;
-
         if(syncAnnual) {
             const currentY = data.years[data.currentYear];
             Object.keys(data.years).forEach(y => {
@@ -269,25 +237,14 @@
             });
         }
         data.lastViewedMonth = currentMonth;
-
-        // Firebaseへ送信
-        dbRef.set(data).catch(err => {
-            alert("保存エラー: " + err.message);
-            const el = document.getElementById('sync-status');
-            if(el) el.innerText = "× エラー";
-        });
-
-        // 予備バックアップ
+        dbRef.set(data).catch(err => {});
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
         
         const el = document.getElementById('sync-status');
         if(el) el.innerText = "↑ 送信中...";
     }
 
-    // =========================================================
-    // 3. アプリの基本機能
-    // =========================================================
-
+    // --- 基本機能 ---
     function createNewYearData() {
         let months = {};
         for(let i=1; i<=12; i++){
@@ -308,9 +265,7 @@
     window.closeMenu = () => { document.getElementById('menu-modal').classList.add('hidden'); };
     window.shareDataText = async () => {
         const str = JSON.stringify(data);
-        if (navigator.share) {
-            try { await navigator.share({ title: '家計簿バックアップ', text: str }); return; } catch (err) { }
-        }
+        if (navigator.share) { try { await navigator.share({ title: '家計簿バックアップ', text: str }); return; } catch (err) { } }
         window.location.href = "mailto:?subject=家計簿バックアップ&body=" + encodeURIComponent(str);
     };
     window.exportDataToClipboard = () => {
@@ -344,14 +299,9 @@
         if(!data.years[data.currentYear] || !data.years[data.currentYear].months[currentMonth]) return;
         const block = data.years[data.currentYear].months[currentMonth][bIdx];
         let s1=0, s2=0;
-        
         const items = block.items || [];
-        
-        if(block.type === 'standard') {
-            items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); });
-        } else {
-            items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); });
-        }
+        if(block.type === 'standard') { items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); }); } 
+        else { items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); }); }
         const el1 = document.getElementById(`t1-${bIdx}`);
         const el2 = document.getElementById(`t2-${bIdx}`);
         if(el1) el1.innerText = formatNum(s1);
@@ -360,7 +310,6 @@
 
     function render() {
         if(!isDataLoaded) return; 
-
         const yearSelect = document.getElementById('year-select');
         yearSelect.innerHTML = '';
         const sortedYears = Object.keys(data.years).sort();
@@ -376,12 +325,9 @@
         const yearData = data.years[data.currentYear];
         const annualSec = document.getElementById('annual-section');
         const toggleBtn = document.getElementById('annual-main-toggle');
-        
         if(data.showAnnual){ annualSec.classList.remove('hidden'); toggleBtn.innerText="－"; } else { annualSec.classList.add('hidden'); toggleBtn.innerText="＋"; }
-
         const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
         if(yearData.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
-
         const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
         if(yearData.isAnnualMonthOpen!==false){ cM.classList.remove('hidden'); bM.innerText="－"; } else { cM.classList.add('hidden'); bM.innerText="＋"; }
 
@@ -400,6 +346,7 @@
         renderMonthlyBlocks(yearData);
     }
 
+    // --- 高速化のため、cb(保存)をoninputからonblur/onchangeに移動 ---
     function renderAnnualTable(cid, list, key, mode) {
         const c=document.getElementById(cid); c.innerHTML='';
         const t=document.createElement('table');
@@ -426,7 +373,6 @@
         yd.months[currentMonth].forEach((b,bi)=>{
             const d=document.createElement('div'); d.className='category-block';
             d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value)"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi})">削除</button><button class="btn-toggle" onclick="togBk(${bi})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
-            
             const contentDiv = document.createElement('div'); 
             if(b.isOpen===false) contentDiv.classList.add('hidden');
             
@@ -435,7 +381,6 @@
                 if(b.deposit === undefined) b.deposit = 0;
                 
                 const summaryDiv = document.createElement('div'); summaryDiv.className = 'summary-area';
-                
                 const item1 = document.createElement('div'); item1.className = 'summary-item';
                 const label1 = document.createElement('div'); label1.className = 'summary-label'; label1.innerText = '残高';
                 item1.appendChild(label1);
@@ -449,29 +394,22 @@
                 const depInp = createMon(b.deposit, v=>updBkVal(bi, 'deposit', v), null, true);
                 depInp.id = `deposit-input-${currentMonth}-${bi}`;
                 item2.appendChild(depInp);
-
-                summaryDiv.appendChild(item1);
-                summaryDiv.appendChild(item2);
-                contentDiv.appendChild(summaryDiv);
+                summaryDiv.appendChild(item1); summaryDiv.appendChild(item2); contentDiv.appendChild(summaryDiv);
             }
 
             const t=document.createElement('table'); const tb=document.createElement('tbody');
-
             if(b.type==='standard') {
                 t.innerHTML=`<thead><tr><th class="col-date-month">日付</th><th>内容</th><th class="col-money">予定額</th><th class="col-money">確定額</th><th class="col-del"></th></tr></thead>`;
             } else {
                 t.innerHTML=`<thead><tr><th class="col-date-month">日付</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-del"></th></tr></thead>`;
             }
-
             const items = b.items || [];
-
             items.forEach((it,ii)=>{
                 const tr=document.createElement('tr');
                 const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
                 w.append(createInp(it.date, v=>updIt(bi,ii,'date',v), 'day'), createSuf("日")); tdD.appendChild(w);
                 const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v)));
                 tr.append(tdD, tdN);
-                
                 if(b.type==='standard'){
                     const td1=document.createElement('td'); td1.appendChild(createMon(it.plan, v=>updIt(bi,ii,'plan',v), ()=>updateTotalDisplay(bi)));
                     const td2=document.createElement('td'); td2.appendChild(createMon(it.act, v=>updIt(bi,ii,'act',v), ()=>updateTotalDisplay(bi)));
@@ -494,24 +432,45 @@
                 items.forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)});
                 trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td></td>`; 
             }
-            tb.appendChild(trTotal); t.appendChild(tb);
-            contentDiv.appendChild(t); 
+            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.appendChild(t); 
             const ab=document.createElement('button'); ab.className='add-row-btn'; ab.innerText='追加'; ab.onclick=()=>addIt(bi); 
             contentDiv.appendChild(ab);
-            
             d.appendChild(contentDiv); c.appendChild(d);
         });
     }
 
+    // 【修正】数字入力：cb（保存）は onblur（入力を終えた時）だけ呼ぶ
     function createInp(val, cb, type) {
         const i=document.createElement('input'); i.value=val||"";
-        if(type==='date') { i.type="text"; i.className="date-input"; i.oninput=function(){cb(this.value)}; i.onblur=function(){this.value=formatDateAnnual(this.value);cb(this.value)}; }
-        else { i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); i.oninput=function(){let v=this.value.replace(/[^0-9]/g,'');if(Number(v)>31)v="31";if(this.value!==v)this.value=v;cb(v)}; }
+        if(type==='date') { 
+            i.type="text"; i.className="date-input"; 
+            // 入力中は保存しない
+            i.oninput=function(){}; 
+            i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; 
+        }
+        else { 
+            i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); 
+            // 入力中は数字チェックだけ（保存しない）
+            i.oninput=function(){
+                let v=this.value.replace(/[^0-9]/g,'');
+                if(Number(v)>31)v="31";
+                if(this.value!==v)this.value=v;
+            };
+            i.onblur=function(){ cb(this.value); };
+        }
         return i;
     }
     function createSuf(t){const s=document.createElement('span');s.className="day-suffix";s.innerText=t;return s;}
-    function createTxt(v,cb){const t=document.createElement('textarea');t.value=v||"";t.rows=1;t.oninput=function(){autoResize(this);cb(this.value)};return t;}
     
+    // 【修正】テキスト入力：cb（保存）は onblur だけ呼ぶ
+    function createTxt(v,cb){
+        const t=document.createElement('textarea'); t.value=v||""; t.rows=1;
+        t.oninput=function(){ autoResize(this); }; // 高さ調整だけ
+        t.onblur=function(){ cb(this.value); };    // 保存は外れた時
+        return t;
+    }
+    
+    // 【修正済み】金額入力：元々onblurなのでOK
     function createMon(v, cb, bCb, isBig = false){
         const i=document.createElement('input');
         i.type="tel"; 
