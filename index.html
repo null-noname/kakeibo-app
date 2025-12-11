@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>kakeibo_V7.01</title>
+<title>kakeibo_V7.02</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
     /* ----------------------------------------------------
-       デザインスタイル (V7.01 上部タブ・独立メモ版)
+       デザインスタイル (V7.02 全文表示＆編集モード切替版)
        ---------------------------------------------------- */
     body { 
         font-family: sans-serif; margin: 0; padding: 0; 
         background: #121212; color: #e0e0e0; 
         padding-bottom: 50px; 
-        padding-top: calc(90px + env(safe-area-inset-top)); /* タブの分高さを確保 */
+        padding-top: calc(90px + env(safe-area-inset-top)); 
         user-select: none; 
     }
 
-    /* --- ヘッダー＆タブエリア --- */
+    /* --- ヘッダー＆タブ --- */
     .header-area {
         position: fixed; top: 0; left: 0; width: 100%;
         background: #1b5e20; z-index: 1000;
@@ -31,8 +31,6 @@
         height: 30px; display: flex; align-items: center; justify-content: center;
         font-weight: bold; color: #81c784; font-size: 0.9em;
     }
-    
-    /* 上部タブ */
     .top-tabs {
         display: flex; width: 100%; height: 50px;
         background: #1b5e20;
@@ -41,51 +39,86 @@
         flex: 1; display: flex; align-items: center; justify-content: center;
         color: #a5d6a7; font-weight: bold; cursor: pointer;
         border-bottom: 4px solid transparent;
-        transition: all 0.2s;
-        font-size: 1.05em;
+        transition: all 0.2s; font-size: 1.05em;
     }
     .tab-item.active {
-        color: #fff;
-        border-bottom: 4px solid #fff;
+        color: #fff; border-bottom: 4px solid #fff;
         background: rgba(255,255,255,0.1);
     }
 
     .container { padding: 10px; max-width: 600px; margin: 0 auto; }
-
-    /* --- 画面切り替え --- */
     .view-section { display: none; animation: fadeIn 0.2s ease; }
     .view-section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* --- メモ帳リストスタイル --- */
-    .memo-list-item {
-        background: #2a2a2a; border: 1px solid #444; border-radius: 5px;
-        padding: 15px; margin-bottom: 10px;
-        display: flex; justify-content: space-between; align-items: center;
-        cursor: pointer;
-    }
-    .memo-title-disp { font-weight: bold; color: #fff; font-size: 1.1em; }
-    .memo-date { font-size: 0.8em; color: #888; }
+    /* --- ▼▼▼ メモ帳スタイル (V7.02 修正版) ▼▼▼ --- */
     
-    /* メモ編集画面 */
-    #memo-editor { display: none; }
-    #memo-editor.active { display: block; }
-    .editor-toolbar { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    input.memo-title-input { width: 100%; margin-bottom: 10px; font-weight: bold; }
-    textarea.memo-body { 
-        width: 100%; height: 60vh; background: #1e1e1e; 
-        color: #eee; border: 1px solid #444; padding: 10px; 
-        font-size: 1.1em; line-height: 1.6; border-radius: 4px;
-        font-family: monospace;
+    /* 1. 閲覧モード（カード表示） */
+    .memo-card {
+        background: #202020; /* 閲覧モードの背景 */
+        border: 1px solid #333; border-radius: 8px;
+        padding: 15px; margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    
+    .memo-card-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px dashed #444; padding-bottom: 10px; margin-bottom: 10px;
+    }
+    
+    .memo-card-title { 
+        font-weight: bold; color: #81c784; font-size: 1.2em; 
+    }
+    
+    .btn-edit-mode {
+        background: #333; color: #fff; 
+        border: 1px solid #555; border-radius: 4px;
+        padding: 6px 12px; font-size: 0.9em; cursor: pointer;
     }
 
-    /* --- 保存タブのスタイル --- */
-    .settings-menu {
-        background: #1e1e1e; padding: 20px; border-radius: 8px; border: 1px solid #333;
-        text-align: center;
+    .memo-card-body {
+        font-family: 'Consolas', 'Monaco', monospace; /* 等幅フォント */
+        color: #e0e0e0; font-size: 1.05em; 
+        line-height: 1.6;
+        white-space: pre-wrap; /* 改行をそのまま表示 */
+        word-break: break-all;
+    }
+
+    /* 2. 編集モード（Win11メモ帳風・全画面） */
+    #memo-editor { 
+        display: none; 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #121212; z-index: 2000;
+        padding-top: env(safe-area-inset-top);
+        flex-direction: column;
+    }
+    #memo-editor.active { display: flex; }
+
+    .editor-toolbar { 
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 15px; background: #202020; border-bottom: 1px solid #333;
     }
     
-    /* --- 共通パーツ --- */
+    input.memo-title-input { 
+        width: 100%; background: transparent; border: none;
+        color: #fff; font-size: 1.2em; font-weight: bold;
+        padding: 10px 15px; border-bottom: 1px solid #333;
+        outline: none;
+    }
+    
+    textarea.memo-body { 
+        flex: 1; width: 100%; 
+        background: #272727; /* 編集画面は少し明るいグレー */
+        color: #f0f0f0; 
+        border: none; padding: 15px; 
+        font-size: 16px; 
+        line-height: 1.6; 
+        font-family: 'Consolas', 'Monaco', monospace;
+        resize: none; outline: none;
+        box-sizing: border-box;
+    }
+
+    /* --- 以下、共通・家計簿スタイル --- */
     h2 { font-size: 1.2em; border-left: 6px solid #2e7d32; padding-left: 10px; margin: 20px 0 10px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
     .btn-red { background: #c62828; color: #fff; border: 1px solid #e57373; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
@@ -98,7 +131,6 @@
     .add-row-btn { width: 100%; padding: 10px; margin-top: 5px; background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; font-size: 1.1em; cursor: pointer; }
     
     input, textarea { box-sizing: border-box; border: 1px solid #444; background: #2a2a2a; border-radius: 3px; color: #fff; font-size: 1.15em; padding: 2px; }
-    /* 家計簿用テキストエリア */
     textarea.kakeibo-text { width: 100%; color: #eee; resize: none; min-height: 2.0em; vertical-align: middle; word-break: break-all; }
     
     input { height: 2.0em; }
@@ -151,7 +183,7 @@
 <body>
 
 <div class="header-area">
-    <div class="app-title-bar">家計簿 V7.01</div>
+    <div class="app-title-bar">家計簿</div>
     <div class="top-tabs">
         <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
         <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
@@ -260,7 +292,7 @@
         currentYear: "2025",
         lastViewedTab: "kakeibo",
         years: { "2025": createNewYearData() },
-        freeMemos: [] // 新しいメモ帳データ配列
+        freeMemos: [] 
     };
 
     let data = JSON.parse(JSON.stringify(initialData));
@@ -290,7 +322,12 @@
         isDataLoaded = true;
         // 復元処理
         switchView(data.lastViewedTab || 'kakeibo');
-        renderMemoList(); // メモ一覧更新
+        // 編集中の場合はリストに戻さない
+        if(document.getElementById('memo-editor').classList.contains('active')) {
+            // 編集中なら何もしない
+        } else {
+            renderMemoList(); 
+        }
         
         if(statusEl) {
             statusEl.innerText = "● 同期完了";
@@ -331,14 +368,18 @@
         return {
             annualYear: [], annualMonth: [],
             isAnnualYearOpen: true, isAnnualMonthOpen: true,
-            activeMonth: 1, // 各年ごとに最後に開いた月を記憶
+            activeMonth: 1, 
             months: months
         };
     }
 
     // --- ビュー切り替え ---
     window.switchView = (viewName) => {
-        // タブの表示切り替え
+        // メモ編集中にタブ切り替えたら閉じる
+        if(viewName !== 'memo') {
+            closeMemoEditor();
+        }
+
         ['memo','fixed','kakeibo','save'].forEach(v => {
             document.getElementById(`tab-${v}`).classList.remove('active');
             document.getElementById(`view-${v}`).classList.remove('active');
@@ -346,21 +387,15 @@
         document.getElementById(`tab-${viewName}`).classList.add('active');
         document.getElementById(`view-${viewName}`).classList.add('active');
         
-        data.lastViewedTab = viewName; // タブ状態保存
+        data.lastViewedTab = viewName; 
         
-        // 収支タブが開かれたら描画
-        if(viewName === 'kakeibo' || viewName === 'fixed') {
-            renderKakeibo();
-        }
-        if(viewName === 'memo') {
-            renderMemoList();
-        }
+        if(viewName === 'kakeibo' || viewName === 'fixed') renderKakeibo();
+        if(viewName === 'memo') renderMemoList();
         
-        // 保存は頻繁にさせない（タブ切り替え自体は軽いので）
         if(isDataLoaded) saveData();
     };
 
-    // --- メモ機能 (Win11風・自由追加) ---
+    // --- メモ機能 (V7.02 全文表示版) ---
     window.addNewMemo = () => {
         const newId = Date.now().toString();
         data.freeMemos.push({ id: newId, title: "新規メモ", body: "" });
@@ -373,9 +408,27 @@
         container.innerHTML = '';
         data.freeMemos.forEach(memo => {
             const div = document.createElement('div');
-            div.className = 'memo-list-item';
-            div.onclick = () => openMemoEditor(memo.id);
-            div.innerHTML = `<span class="memo-title-disp">${memo.title}</span><span class="memo-date">編集 ></span>`;
+            div.className = 'memo-card';
+            // 安全なテキスト表示のためにinnerTextを使う
+            
+            // ヘッダー（タイトル＋編集ボタン）
+            const header = document.createElement('div');
+            header.className = 'memo-card-header';
+            header.innerHTML = `<span class="memo-card-title">${memo.title}</span>`;
+            
+            const btn = document.createElement('button');
+            btn.className = 'btn-edit-mode';
+            btn.innerText = '✐ 編集';
+            btn.onclick = () => openMemoEditor(memo.id);
+            header.appendChild(btn);
+            
+            // 本文（全文表示）
+            const body = document.createElement('div');
+            body.className = 'memo-card-body';
+            body.innerText = memo.body; // ここで全文セット
+
+            div.appendChild(header);
+            div.appendChild(body);
             container.appendChild(div);
         });
     };
@@ -393,7 +446,8 @@
     };
 
     window.closeMemoEditor = () => {
-        saveCurrentMemo(); // 閉じる前に保存
+        if(!editingMemoId) return;
+        saveCurrentMemo(); 
         editingMemoId = null;
         document.getElementById('memo-editor').classList.remove('active');
         document.getElementById('memo-list-view').style.display = 'block';
@@ -422,7 +476,6 @@
 
     // --- 家計簿・固定費 ロジック ---
     function renderKakeibo() {
-        // 年プルダウン
         const yearSelect = document.getElementById('year-select');
         yearSelect.innerHTML = '';
         const sortedYears = Object.keys(data.years).sort();
@@ -436,11 +489,8 @@
         });
 
         const yearData = data.years[data.currentYear];
-        
-        // ★重要: その年の「最後に開いていた月」を復元（なければ1月）
         let activeMonth = yearData.activeMonth || 1;
         
-        // 固定費エリア
         const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
         if(yearData.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
         const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
@@ -449,14 +499,13 @@
         renderAnnualTable('annual-table-year', yearData.annualYear, 'annualYear', 'yearMode');
         renderAnnualTable('annual-table-month', yearData.annualMonth, 'annualMonth', 'monthMode');
 
-        // 月タブ
         const tabs=document.getElementById('month-tabs'); tabs.innerHTML='';
         for(let i=1; i<=12; i++){ 
             const d=document.createElement('div'); 
             d.className=`month-btn ${activeMonth===i?'active':''}`;
             d.innerText=i+"月"; 
             d.onclick=()=>{ 
-                yearData.activeMonth = i; // ★月を保存
+                yearData.activeMonth = i; 
                 saveData(); 
                 renderKakeibo(); 
             }; 
@@ -466,7 +515,7 @@
         renderMonthlyBlocks(yearData, activeMonth);
     }
 
-    // --- 以下、既存の描画・操作関数（変更なし） ---
+    // --- 以下、既存の描画・操作関数 ---
     function renderAnnualTable(cid, list, key, mode) {
         const c=document.getElementById(cid); c.innerHTML='';
         const t=document.createElement('table');
@@ -569,7 +618,6 @@
         if(el2) el2.innerText = formatNum(s2);
     }
 
-    // --- 入力ヘルパー ---
     function createInp(val, cb, type) {
         const i=document.createElement('input'); i.value=val||"";
         if(type==='date') { 
@@ -639,7 +687,6 @@
     window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);renderKakeibo()};
     window.addCategoryBlock=(t)=>{
         const T=t==='standard'?'リスト1':'リスト2';
-        // 現在開いている月にブロックを追加
         const m = data.years[data.currentYear].activeMonth || 1;
         data.years[data.currentYear].months[m].push({type:t,title:T,isOpen:true,items:[], balance:0, deposit:0});
         saveData();renderKakeibo();
@@ -681,7 +728,6 @@
         if(!confirm("現在のデータを上書きして復元し、クラウドに保存しますか？")) return;
         try {
             data = JSON.parse(str);
-            // データ構造補完
             if(!data.freeMemos) data.freeMemos = [];
             if(!data.years) data.years = { "2025": createNewYearData() };
             Object.keys(data.years).forEach(y => {
