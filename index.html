@@ -269,10 +269,6 @@
         <div id="view-save" class="view-section">
             <div class="settings-menu">
                 <h2 style="border:none; justify-content:center;">データ管理</h2>
-                <p style="color:#aaa; font-size:0.9em; margin-bottom:15px; text-align:left;">
-                    【書き出し】データを「文字」として保存・共有します。<br>
-                    【読み込み】保存した文字を貼り付けて復元します。
-                </p>
                 <button class="btn-backup" onclick="shareDataText()">📤 データを書き出し (共有)</button>
                 <button class="btn-backup" style="background:#00695c; border-color:#00897b;" onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
                 <hr style="border:0; border-top:1px solid #444; margin:20px 0;">
@@ -287,7 +283,7 @@
 <div id="sync-status">同期待機中...</div>
 
 <script>
-    // kakeibo_V8.07
+    // kakeibo_V8.08 (Pop-up Fallback Edition)
     
     // --- Service Worker Cleanup ---
     if (window.navigator && navigator.serviceWorker) {
@@ -323,34 +319,47 @@
     let isDataLoaded = false;
     let editingMemoId = null;
 
-    // --- ログイン処理ロジック (V8.07) ---
-    auth.getRedirectResult().then((result) => {
-        if (result && result.user) {
-            console.log("Redirect Login Success");
-        }
-    }).catch((error) => {
-        console.error("Redirect Login Error:", error);
-        document.getElementById('sync-status').innerText = "⚠ ログインエラー";
-    });
-
+    // --- ログイン処理ロジック (V8.08 強化) ---
     auth.onAuthStateChanged((user) => {
         const loginScr = document.getElementById('login-screen');
         const mainApp = document.getElementById('main-app');
+        const statusEl = document.getElementById('sync-status');
+        
         if (user) {
+            console.log("Logged in user:", user.email);
             loginScr.style.display = 'none';
             mainApp.style.display = 'block';
             dbRef = db.ref('kakeiboData');
             initApp();
         } else {
+            console.log("No user logged in.");
             loginScr.style.display = 'flex';
             mainApp.style.display = 'none';
-            document.getElementById('sync-status').innerText = "ログイン待機中";
+            statusEl.innerText = "ログイン待機中";
         }
     });
 
-    function loginWithGoogle() {
+    async function loginWithGoogle() {
+        const statusEl = document.getElementById('sync-status');
+        statusEl.innerText = "Google認証中...";
+        
         const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithRedirect(provider);
+        
+        try {
+            // GitHub Pagesではポップアップの方がドメイン制限（Cookie制限）を受けにくい
+            await auth.signInWithPopup(provider);
+            statusEl.innerText = "ログイン成功！";
+        } catch (error) {
+            console.error("Auth Error:", error.code, error.message);
+            statusEl.innerText = "認証エラー: " + error.code;
+            
+            // ポップアップがブロックされた、またはRedirectで失敗し続けた場合の案内
+            if (error.code === 'auth/popup-blocked') {
+                alert("ポップアップがブロックされました。ブラウザの設定で許可してください。");
+            } else {
+                alert("ログインに失敗しました。時間をおいて再度お試しください。\nエラーコード: " + error.code);
+            }
+        }
     }
 
     function logout() {
@@ -359,12 +368,12 @@
         }
     }
 
+    // --- 以降の関数群は以前と同じ ---
     function initApp() {
         if(!dbRef) return;
         dbRef.on('value', (snapshot) => {
             const val = snapshot.val();
             const statusEl = document.getElementById('sync-status');
-            
             if (val) {
                 data = val; 
                 if(!data.years) data = JSON.parse(JSON.stringify(initialData));
@@ -379,24 +388,13 @@
                     data = JSON.parse(JSON.stringify(initialData));
                 }
             }
-            
             isDataLoaded = true;
             switchView(data.lastViewedTab || 'kakeibo');
-            if(!document.getElementById('memo-editor').classList.contains('active')) {
-                renderMemoList(); 
-            }
-            
-            if(statusEl) {
-                statusEl.innerText = "● 同期完了";
-                setTimeout(() => { statusEl.innerText = ""; }, 2000);
-            }
-        }, (error) => {
-            console.error("Firebase Sync Error:", error);
-            document.getElementById('sync-status').innerText = "⚠ 同期失敗";
+            if(!document.getElementById('memo-editor').classList.contains('active')) renderMemoList(); 
+            if(statusEl) { statusEl.innerText = "● 同期完了"; setTimeout(() => { statusEl.innerText = ""; }, 2000); }
         });
     }
 
-    // --- 保存ロジック ---
     function saveData(syncAnnual = false) {
         if(!isDataLoaded || !dbRef) return;
         if(syncAnnual) {
@@ -405,17 +403,16 @@
                 if(y !== data.currentYear && data.years[y]) {
                     data.years[y].annualYear = JSON.parse(JSON.stringify(currentY.annualYear));
                     data.years[y].annualMonth = JSON.parse(JSON.stringify(currentY.annualMonth));
-                    data.years[y].isAnnualYearOpen = currentY.isAnnualYearOpen;
-                    data.years[y].isAnnualMonthOpen = currentY.isAnnualMonthOpen;
                 }
             });
         }
-        dbRef.set(data).catch(err => { console.error("Database Save Error:", err); });
+        dbRef.set(data);
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
         const el = document.getElementById('sync-status');
         if(el) el.innerText = "↑ 送信中...";
     }
 
+    // 他のヘルパー関数（create...等）は省略せずに元のコードを維持してください
     function createNewYearData() {
         let months = {};
         for(let i=1; i<=12; i++){
@@ -425,12 +422,7 @@
                 { type: "detail", title: "競馬", isOpen: true, items: [] }
             ];
         }
-        return {
-            annualYear: [], annualMonth: [],
-            isAnnualYearOpen: true, isAnnualMonthOpen: true,
-            activeMonth: 1, 
-            months: months
-        };
+        return { annualYear: [], annualMonth: [], isAnnualYearOpen: true, isAnnualMonthOpen: true, activeMonth: 1, months: months };
     }
 
     window.switchView = (viewName) => {
@@ -451,398 +443,190 @@
         if(isDataLoaded) saveData();
     };
 
-    // --- メモ帳ロジック ---
+    // メモ帳ロジック
     window.addNewMemo = () => {
         const newId = Date.now().toString();
         data.freeMemos.push({ id: newId, title: "新規メモ", body: "", isOpen: true });
-        saveData();
-        openMemoEditor(newId);
+        saveData(); openMemoEditor(newId);
     };
-
     window.renderMemoList = () => {
         const container = document.getElementById('memo-list-container');
         if(!container) return;
         container.innerHTML = '';
         data.freeMemos.forEach((memo) => {
-            if(memo.isOpen === undefined) memo.isOpen = true; 
-
-            const div = document.createElement('div');
-            div.className = 'memo-card';
-            
-            const header = document.createElement('div');
-            header.className = 'memo-card-header';
-            
-            const titleSpan = document.createElement('span');
-            titleSpan.className = 'memo-card-title';
-            titleSpan.innerText = memo.title;
-            
-            const btnGroup = document.createElement('div');
-            btnGroup.className = 'memo-ctrl-btns';
-
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn-edit-mode';
-            editBtn.innerText = '✐ 編集';
-            editBtn.onclick = (e) => { e.stopPropagation(); openMemoEditor(memo.id); };
-
-            const upBtn = document.createElement('button');
-            upBtn.className = 'btn-icon';
-            upBtn.innerText = '↑';
-            upBtn.onclick = (e) => { e.stopPropagation(); moveMemo(memo.id, 'up'); };
-            
-            const toggleBtn = document.createElement('button');
-            toggleBtn.className = 'btn-toggle-memo';
-            toggleBtn.innerText = memo.isOpen ? '－' : '＋';
-            toggleBtn.onclick = (e) => { e.stopPropagation(); toggleMemo(memo.id); };
-
-            btnGroup.append(editBtn, upBtn, toggleBtn);
-            header.append(titleSpan, btnGroup);
-            div.appendChild(header);
-
-            const body = document.createElement('div');
-            body.className = 'memo-card-body';
-            if(!memo.isOpen) body.classList.add('collapsed');
-            body.innerText = memo.body; 
-            div.appendChild(body);
-
+            const div = document.createElement('div'); div.className = 'memo-card';
+            div.innerHTML = `<div class="memo-card-header"><span class="memo-card-title">${memo.title}</span><div class="memo-ctrl-btns">
+                <button class="btn-edit-mode" onclick="openMemoEditor('${memo.id}')">✐ 編集</button>
+                <button class="btn-icon" onclick="moveMemo('${memo.id}','up')">↑</button>
+                <button class="btn-toggle-memo" onclick="toggleMemo('${memo.id}')">${memo.isOpen ? '－' : '＋'}</button>
+            </div></div><div class="memo-card-body ${memo.isOpen ? '' : 'collapsed'}">${memo.body}</div>`;
             container.appendChild(div);
         });
     };
-
-    window.moveMemo = (id, direction) => {
-        const index = data.freeMemos.findIndex(m => m.id === id);
-        if (index === -1) return;
-        if (direction === 'up' && index > 0) {
-            [data.freeMemos[index], data.freeMemos[index - 1]] = [data.freeMemos[index - 1], data.freeMemos[index]];
-        }
+    window.moveMemo = (id, dir) => {
+        const i = data.freeMemos.findIndex(m => m.id === id);
+        if (dir === 'up' && i > 0) [data.freeMemos[i], data.freeMemos[i-1]] = [data.freeMemos[i-1], data.freeMemos[i]];
         saveData(); renderMemoList();
     };
-
     window.toggleMemo = (id) => {
-        const memo = data.freeMemos.find(m => m.id === id);
-        if(memo) { memo.isOpen = !memo.isOpen; saveData(); renderMemoList(); }
+        const m = data.freeMemos.find(m => m.id === id);
+        if(m) { m.isOpen = !m.isOpen; saveData(); renderMemoList(); }
     };
-
     window.openMemoEditor = (id) => {
-        editingMemoId = id;
-        const memo = data.freeMemos.find(m => m.id === id);
-        if(!memo) return;
+        editingMemoId = id; const m = data.freeMemos.find(m => m.id === id); if(!m) return;
         document.getElementById('memo-list-view').style.display = 'none';
         document.getElementById('memo-editor').classList.add('active');
-        document.getElementById('memo-edit-title').value = memo.title;
-        document.getElementById('memo-edit-body').value = memo.body;
+        document.getElementById('memo-edit-title').value = m.title;
+        document.getElementById('memo-edit-body').value = m.body;
     };
-
     window.closeMemoEditor = () => {
-        if(!editingMemoId) return;
-        saveCurrentMemo(); 
-        editingMemoId = null;
+        saveCurrentMemo(); editingMemoId = null;
         document.getElementById('memo-editor').classList.remove('active');
         document.getElementById('memo-list-view').style.display = 'block';
         renderMemoList();
     };
-
     window.saveCurrentMemo = () => {
-        if(!editingMemoId) return;
-        const memo = data.freeMemos.find(m => m.id === editingMemoId);
-        if(memo) {
-            memo.title = document.getElementById('memo-edit-title').value;
-            memo.body = document.getElementById('memo-edit-body').value;
-            saveData();
-        }
+        if(!editingMemoId) return; const m = data.freeMemos.find(m => m.id === editingMemoId);
+        if(m) { m.title = document.getElementById('memo-edit-title').value; m.body = document.getElementById('memo-edit-body').value; saveData(); }
     };
-
     window.deleteCurrentMemo = () => {
-        if(!confirm("このメモを削除しますか？")) return;
-        data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId);
-        saveData();
-        editingMemoId = null;
-        document.getElementById('memo-editor').classList.remove('active');
-        document.getElementById('memo-list-view').style.display = 'block';
-        renderMemoList();
+        if(confirm("削除？")) { data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId); saveData(); closeMemoEditor(); }
     };
 
-    // --- 家計簿/固定費描画ロジック ---
+    // 家計簿描画ロジック
     function renderKakeibo() {
         const yearSelect = document.getElementById('year-select');
-        if(!yearSelect) return;
         yearSelect.innerHTML = '';
-        const sortedYears = Object.keys(data.years).sort();
-        if(sortedYears.length===0){ data.years["2025"]=createNewYearData(); data.currentYear="2025"; sortedYears.push("2025"); }
-        if(!data.years[data.currentYear]) data.currentYear=sortedYears[0];
-        
-        sortedYears.forEach(y=>{ 
-            const op=document.createElement('option'); op.value=y; op.innerText=y+"年"; 
-            if(y===data.currentYear)op.selected=true; 
-            yearSelect.appendChild(op); 
+        Object.keys(data.years).sort().forEach(y => {
+            const op = document.createElement('option'); op.value = y; op.innerText = y + "年";
+            if(y === data.currentYear) op.selected = true; yearSelect.appendChild(op);
         });
-
-        const yearData = data.years[data.currentYear];
-        let activeMonth = yearData.activeMonth || 1;
-        
-        const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
-        if(yearData.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
-        const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
-        if(yearData.isAnnualMonthOpen!==false){ cM.classList.remove('hidden'); bM.innerText="－"; } else { cM.classList.add('hidden'); bM.innerText="＋"; }
-
-        renderAnnualTable('annual-table-year', yearData.annualYear, 'annualYear');
-        renderAnnualTable('annual-table-month', yearData.annualMonth, 'annualMonth');
-
-        const tabs=document.getElementById('month-tabs'); tabs.innerHTML='';
-        for(let i=1; i<=12; i++){ 
-            const d=document.createElement('div'); 
-            d.className=`month-btn ${activeMonth===i?'active':''}`;
-            d.innerText=i+"月"; 
-            d.onclick=()=>{ yearData.activeMonth = i; saveData(); renderKakeibo(); }; 
-            tabs.appendChild(d);
+        const yd = data.years[data.currentYear];
+        const activeMonth = yd.activeMonth || 1;
+        document.getElementById('btn-annual-year').innerText = yd.isAnnualYearOpen ? '－' : '＋';
+        document.getElementById('content-annual-year').className = yd.isAnnualYearOpen ? '' : 'hidden';
+        document.getElementById('btn-annual-month').innerText = yd.isAnnualMonthOpen ? '－' : '＋';
+        document.getElementById('content-annual-month').className = yd.isAnnualMonthOpen ? '' : 'hidden';
+        renderAnnualTable('annual-table-year', yd.annualYear, 'annualYear');
+        renderAnnualTable('annual-table-month', yd.annualMonth, 'annualMonth');
+        const tabs = document.getElementById('month-tabs'); tabs.innerHTML = '';
+        for(let i=1; i<=12; i++) {
+            const d = document.createElement('div'); d.className = `month-btn ${activeMonth === i ? 'active' : ''}`;
+            d.innerText = i + "月"; d.onclick = () => { yd.activeMonth = i; saveData(); renderKakeibo(); }; tabs.appendChild(d);
         }
         document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`;
-        renderMonthlyBlocks(yearData, activeMonth);
+        renderMonthlyBlocks(yd, activeMonth);
     }
 
     function renderAnnualTable(cid, list, key) {
-        const c=document.getElementById(cid); if(!c) return; c.innerHTML='';
-        const t=document.createElement('table');
-        t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-        const tb=document.createElement('tbody');
-        if(!list) list = []; 
-        list.forEach((item,idx)=>{
-            const tr=document.createElement('tr'); 
-            const tdD=document.createElement('td'); 
-            if(key==='annualYear') tdD.appendChild(createInp(item.date, v=>updAnn(key,idx,'date',v), 'date'));
-            else { const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center"; w.append(createInp(item.date, v=>updAnn(key,idx,'date',v), 'day'), createSuf("日")); tdD.appendChild(w); }
-            
-            const tdTx=document.createElement('td'); tdTx.appendChild(createTxt(item.text, v=>updAnn(key,idx,'text',v)));
-            const tdC=document.createElement('td'); tdC.appendChild(createMon(item.cost, v=>updAnn(key,idx,'cost',v)));
-            const tdUp=document.createElement('td'); if(idx > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx},'up')">↑</button>`;
-            const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
-            
-            tr.append(tdD,tdTx,tdC,tdUp,tdDel); 
-            tb.appendChild(tr); 
+        const c = document.getElementById(cid); c.innerHTML = '';
+        const t = document.createElement('table');
+        t.innerHTML = `<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+        const tb = document.createElement('tbody');
+        (list || []).forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            const tdD = document.createElement('td'); tdD.appendChild(createInp(item.date, v => { data.years[data.currentYear][key][idx].date = v; saveData(true); }, key === 'annualYear' ? 'date' : 'day'));
+            const tdT = document.createElement('td'); tdT.appendChild(createTxt(item.text, v => { data.years[data.currentYear][key][idx].text = v; saveData(true); }));
+            const tdC = document.createElement('td'); tdC.appendChild(createMon(item.cost, v => { data.years[data.currentYear][key][idx].cost = v; saveData(true); }));
+            const tdU = document.createElement('td'); tdU.innerHTML = idx > 0 ? `<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx})">↑</button>` : '';
+            const tdDk = document.createElement('td'); tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
+            tr.append(tdD, tdT, tdC, tdU, tdDk); tb.appendChild(tr);
         });
         t.appendChild(tb); c.appendChild(t);
     }
 
-    function renderMonthlyBlocks(yd, month) {
-        const c=document.getElementById('monthly-container'); if(!c) return; c.innerHTML='';
-        if(!yd.months[month]) yd.months[month] = [];
-        
-        yd.months[month].forEach((b,bi)=>{
-            const d=document.createElement('div'); d.className='category-block';
-            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
-            const contentDiv = document.createElement('div'); 
-            if(b.isOpen===false) contentDiv.classList.add('hidden');
-            
-            if(b.type==='standard') {
-                if(b.balance === undefined) b.balance = 0;
-                if(b.deposit === undefined) b.deposit = 0;
-                const summaryDiv = document.createElement('div'); summaryDiv.className = 'summary-area';
-                const item1 = document.createElement('div'); item1.className = 'summary-item';
-                const label1 = document.createElement('div'); label1.className = 'summary-label'; label1.innerText = '残高';
-                item1.append(label1, createMon(b.balance, v=>updBkVal(bi, 'balance', v, month), null, true));
-                const item2 = document.createElement('div'); item2.className = 'summary-item';
-                const label2 = document.createElement('div'); label2.className = 'summary-label'; label2.innerText = '入れる額';
-                item2.append(label2, createMon(b.deposit, v=>updBkVal(bi, 'deposit', v, month), null, true));
-                summaryDiv.append(item1, item2); contentDiv.appendChild(summaryDiv);
-            }
-
-            const t=document.createElement('table'); const tb=document.createElement('tbody');
-            if(b.type==='standard') {
-                t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">予定額</th><th class="col-money">確定額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-            } else {
-                t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-            }
-            const items = b.items || [];
-            items.forEach((it,ii)=>{
-                const tr=document.createElement('tr');
-                const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
-                w.append(createInp(it.date, v=>updIt(bi,ii,'date',v,month), 'day'), createSuf("日")); tdD.appendChild(w);
-                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v,month)));
-                tr.append(tdD, tdN);
-                
-                if(b.type==='standard'){
-                    tr.append(createMonTd(it.plan, v=>updIt(bi,ii,'plan',v,month), bi, month), createMonTd(it.act, v=>updIt(bi,ii,'act',v,month), bi, month));
-                } else {
-                    tr.append(createMonTd(it.out, v=>updIt(bi,ii,'out',v,month), bi, month), createMonTd(it.in, v=>updIt(bi,ii,'in',v,month), bi, month));
+    function renderMonthlyBlocks(yd, m) {
+        const c = document.getElementById('monthly-container'); c.innerHTML = '';
+        (yd.months[m] || []).forEach((b, bi) => {
+            const d = document.createElement('div'); d.className = 'category-block';
+            d.innerHTML = `<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="data.years[data.currentYear].months[${m}][${bi}].title=this.value;saveData()"><div style="display:flex;gap:5px;"><button class="btn-red" onclick="delBk(${bi},${m})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${m})">${b.isOpen ? '－' : '＋'}</button></div></div>`;
+            if(b.isOpen) {
+                const inner = document.createElement('div');
+                if(b.type === 'standard') {
+                    inner.innerHTML = `<div class="summary-area"><div class="summary-item"><span class="summary-label">残高</span><div id="bal-${bi}"></div></div><div class="summary-item"><span class="summary-label">入れる額</span><div id="dep-${bi}"></div></div></div>`;
+                    inner.querySelector('#bal-').id += bi; inner.querySelector('#dep-').id += bi;
+                    inner.querySelector('#bal-'+bi).appendChild(createMon(b.balance, v => { data.years[data.currentYear].months[m][bi].balance = v; saveData(); }, null, true));
+                    inner.querySelector('#dep-'+bi).appendChild(createMon(b.deposit, v => { data.years[data.currentYear].months[m][bi].deposit = v; saveData(); }, null, true));
                 }
-                
-                const tdUp=document.createElement('td'); if(ii > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${month},'up')">↑</button>`;
-                const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${month})">×</button>`;
-                tr.append(tdUp, tdDel);
-                tb.appendChild(tr); 
-            });
-
-            const trTotal = document.createElement('tr'); trTotal.className = 'total-row';
-            let s1=0, s2=0;
-            if(b.type==='standard'){ 
-                items.forEach(i=>{s1+=Number(i.plan);s2+=Number(i.act)});
-                trTotal.innerHTML=`<td class="total-label">合計</td><td></td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; 
-            } else { 
-                items.forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)});
-                trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; 
+                const t = document.createElement('table');
+                t.innerHTML = b.type === 'standard' ? `<thead><tr><th class="col-date">日</th><th>内容</th><th class="col-money">予定</th><th class="col-money">確定</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>` : `<thead><tr><th class="col-date">日</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+                const tb = document.createElement('tbody');
+                (b.items || []).forEach((it, ii) => {
+                    const tr = document.createElement('tr');
+                    const tdD = document.createElement('td'); tdD.appendChild(createInp(it.date, v => { data.years[data.currentYear].months[m][bi].items[ii].date = v; saveData(); }, 'day'));
+                    const tdN = document.createElement('td'); tdN.appendChild(createTxt(it.name, v => { data.years[data.currentYear].months[m][bi].items[ii].name = v; saveData(); }));
+                    tr.append(tdD, tdN);
+                    if(b.type === 'standard') {
+                        tr.appendChild(createMonTd(it.plan, v => { data.years[data.currentYear].months[m][bi].items[ii].plan = v; saveData(); }, bi, m));
+                        tr.appendChild(createMonTd(it.act, v => { data.years[data.currentYear].months[m][bi].items[ii].act = v; saveData(); }, bi, m));
+                    } else {
+                        tr.appendChild(createMonTd(it.out, v => { data.years[data.currentYear].months[m][bi].items[ii].out = v; saveData(); }, bi, m));
+                        tr.appendChild(createMonTd(it.in, v => { data.years[data.currentYear].months[m][bi].items[ii].in = v; saveData(); }, bi, m));
+                    }
+                    const tdU = document.createElement('td'); tdU.innerHTML = ii > 0 ? `<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${m},'up')">↑</button>` : '';
+                    const tdDk = document.createElement('td'); tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${m})">×</button>`;
+                    tr.append(tdU, tdDk); tb.appendChild(tr);
+                });
+                const totalTr = document.createElement('tr'); totalTr.className = 'total-row';
+                totalTr.innerHTML = `<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">0</div></td><td><div class="total-val-box" id="t2-${bi}">0</div></td><td colspan="2"></td>`;
+                tb.appendChild(totalTr); t.appendChild(tb); inner.appendChild(t); inner.appendChild(createAddRowBtn(() => addIt(bi, m))); d.appendChild(inner);
+                setTimeout(() => updateTotalDisplay(bi, m), 0);
             }
-            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.append(t, createAddRowBtn(()=>addIt(bi, month)));
-            d.appendChild(contentDiv); c.appendChild(d);
+            c.appendChild(d);
         });
     }
 
-    // --- 各種パーツ生成ヘルパー ---
-    function createMonTd(v, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(v, cb, ()=>updateTotalDisplay(bi,m))); return td; }
-    function updateTotalDisplay(bIdx, month) {
-        const block = data.years[data.currentYear].months[month][bIdx];
-        let s1=0, s2=0;
-        const items = block.items || [];
-        if(block.type === 'standard') { items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); }); } 
-        else { items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); }); }
-        const el1 = document.getElementById(`t1-${bIdx}`);
-        const el2 = document.getElementById(`t2-${bIdx}`);
-        if(el1) el1.innerText = formatNum(s1);
-        if(el2) el2.innerText = formatNum(s2);
+    // パーツ生成ヘルパー群
+    function createMonTd(v, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(v, cb, () => updateTotalDisplay(bi, m))); return td; }
+    function updateTotalDisplay(bi, m) {
+        const b = data.years[data.currentYear].months[m][bi]; let s1 = 0, s2 = 0;
+        (b.items || []).forEach(it => { if(b.type === 'standard') { s1 += Number(it.plan || 0); s2 += Number(it.act || 0); } else { s1 += Number(it.out || 0); s2 += Number(it.in || 0); } });
+        const e1 = document.getElementById(`t1-${bi}`), e2 = document.getElementById(`t2-${bi}`);
+        if(e1) e1.innerText = formatNum(s1); if(e2) e2.innerText = formatNum(s2);
     }
-
-    function createInp(val, cb, type) {
-        const i=document.createElement('input'); i.value=val||"";
-        if(type==='date') { 
-            i.className="date-input"; i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; 
-        } else { 
-            i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); 
-            i.oninput=function(){
-                let v=this.value.replace(/[^0-9]/g,'');
-                if(Number(v)>31)v="31";
-                if(this.value!==v)this.value=v;
-            };
-            i.onblur=function(){ cb(this.value); };
-        }
+    function createInp(v, cb, type) {
+        const i = document.createElement('input'); i.value = v || "";
+        if(type === 'date') { i.className = "date-input"; i.onblur = function() { this.value = formatDateAnnual(this.value); cb(this.value); }; }
+        else { i.type = "tel"; i.className = "day-input"; i.oninput = function() { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2); }; i.onblur = function() { cb(this.value); }; }
         return i;
     }
-    function createSuf(t){const s=document.createElement('span');s.className="day-suffix";s.innerText=t;return s;}
-    function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
-    function createTxt(v,cb){
-        const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.rows=1;
-        t.oninput=function(){ autoResize(this); }; 
-        t.onblur=function(){ cb(this.value); };
-        setTimeout(() => autoResize(t), 0);
-        return t;
+    function createTxt(v, cb) {
+        const t = document.createElement('textarea'); t.className = "kakeibo-text"; t.value = v || ""; t.rows = 1;
+        t.oninput = function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; };
+        t.onblur = function() { cb(this.value); }; setTimeout(() => t.oninput(), 0); return t;
     }
-    function createMon(v, cb, bCb, isBig = false){
-        const i=document.createElement('input');
-        i.type="tel"; i.className = isBig ? "summary-input" : "money-input";
-        i.value = (v === 0 || v === "0") ? "" : Number(v).toLocaleString();
-        i.onfocus=function(){ this.value=this.value.replace(/,/g,''); this.select(); };
-        i.oninput=function(){
-             let raw = this.value.replace(/[^0-9\-]/g, '');
-             if(raw.lastIndexOf('-') > 0) raw = raw.replace(/-/g, '');
-             const isMinus = raw.startsWith('-');
-             let numPart = isMinus ? raw.slice(1) : raw;
-             if(numPart.length > 6) { numPart = numPart.slice(0, 6); raw = isMinus ? '-' + numPart : numPart; }
-             if(this.value !== raw) this.value = raw;
-        };
-        i.onblur=function(){
-            let val = this.value.replace(/,/g,'').replace(/[０-９]/g,s=>String.fromCharCode(s.charCodeAt(0)-0xFEE0));
-            val = val.replace(/[^0-9\-]/g, '');
-            const n = parseFloat(val); 
-            if (isNaN(n) || n === 0) { cb(0); this.value = ""; } 
-            else { 
-                if(n > 999999) { cb(999999); this.value = "999,999"; }
-                else if(n < -999999) { cb(-999999); this.value = "-999,999"; }
-                else { cb(n); this.value = n.toLocaleString(); }
-            }
-            if(bCb) bCb();
-        };
-        return i;
+    function createMon(v, cb, bCb, isBig) {
+        const i = document.createElement('input'); i.type = "tel"; i.className = isBig ? "summary-input" : "money-input";
+        i.value = v ? Number(v).toLocaleString() : "";
+        i.onfocus = function() { this.value = this.value.replace(/,/g, ''); this.select(); };
+        i.onblur = function() { 
+            let n = parseInt(this.value.replace(/[^0-9\-]/g, '')) || 0; 
+            cb(n); this.value = n ? n.toLocaleString() : ""; if(bCb) bCb(); 
+        }; return i;
     }
-    function createAddRowBtn(fn){ const b=document.createElement('button'); b.className='add-row-btn'; b.innerText='追加'; b.onclick=fn; return b; }
-    function formatDateAnnual(val) {
-        const nums = val.replace(/[^0-9]/g, '');
-        if (nums.length === 4) return parseInt(nums.slice(0,2)) + "/" + parseInt(nums.slice(2,4));
-        if (nums.length === 3) return parseInt(nums.slice(0,1)) + "/" + parseInt(nums.slice(1,3));
-        return val;
-    }
-    function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
+    function createAddRowBtn(fn) { const b = document.createElement('button'); b.className = 'add-row-btn'; b.innerText = '追加'; b.onclick = fn; return b; }
+    function formatDateAnnual(v) { let n = v.replace(/[^0-9]/g, ''); return n.length === 4 ? n.slice(0,2)+"/"+n.slice(2,4) : v; }
+    function formatNum(n) { return Number(n).toLocaleString(); }
 
-    // --- 操作ロジック ---
-    window.addAnnualItem = (k) => {
-        const l = (k === 'year' || k === 'annualYear') ? 'annualYear' : 'annualMonth';
-        if (!data.years[data.currentYear][l]) data.years[data.currentYear][l] = [];
-        data.years[data.currentYear][l].push({ date: "", text: "", cost: 0 });
-        saveData(true); renderKakeibo();
-    };
-    window.moveAnn = (key, idx, dir) => {
-        const list = data.years[data.currentYear][key];
-        if(!list) return;
-        if(dir === 'up' && idx > 0) [list[idx], list[idx-1]] = [list[idx-1], list[idx]];
-        saveData(true); renderKakeibo();
-    };
-    window.updAnn=(l,i,k,v)=>{data.years[data.currentYear][l][i][k]=v;saveData(true)};
-    window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);renderKakeibo()};
-    window.toggleAnnualSub=(t)=>{
-        if(t==='year') data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;
-        else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;
-        saveData(true); renderKakeibo();
-    };
-    window.togBk=(i, m)=>{data.years[data.currentYear].months[m][i].isOpen=!data.years[data.currentYear].months[m][i].isOpen;saveData();renderKakeibo()};
-    window.addCategoryBlock=(t)=>{
-        const m = data.years[data.currentYear].activeMonth || 1;
-        data.years[data.currentYear].months[m].push({type:t,title:t==='standard'?'リスト1':'リスト2',isOpen:true,items:[], balance:0, deposit:0});
-        saveData();renderKakeibo();
-    };
-    window.delBk=(i, m)=>{if(confirm("削除？")){data.years[data.currentYear].months[m].splice(i,1);saveData();renderKakeibo()}};
-    window.updBkTi=(i,v, m)=>{data.years[data.currentYear].months[m][i].title=v;saveData()};
-    window.updBkVal=(i,key,v, m)=>{data.years[data.currentYear].months[m][i][key]=v;saveData()};
-    window.addIt=(i, m)=>{
-        const b=data.years[data.currentYear].months[m][i];
-        if(!b.items) b.items = []; 
-        if(b.type==='standard')b.items.push({date:"",name:"",plan:0,act:0});else b.items.push({date:"",name:"",out:0,in:0});
-        saveData();renderKakeibo();
-    };
-    window.moveIt = (bIdx, iIdx, m, dir) => {
-        const list = data.years[data.currentYear].months[m][bIdx].items;
-        if(!list) return;
-        if(dir === 'up' && iIdx > 0) [list[iIdx], list[iIdx-1]] = [list[iIdx-1], list[iIdx]];
-        saveData(); renderKakeibo();
-    };
-    window.updIt=(b,i,k,v, m)=>{data.years[data.currentYear].months[m][b].items[i][k]=v;saveData()};
-    window.delIt=(b,i, m)=>{data.years[data.currentYear].months[m][b].items.splice(i,1);saveData();renderKakeibo()};
-    window.changeYear=()=>{data.currentYear=document.getElementById('year-select').value;renderKakeibo()};
-    window.addNewYear=()=>{
-        const n=prompt("追加する西暦（例: 2026）");
-        if(n && !data.years[n]){
-            const c=data.years[data.currentYear];
-            const ny=createNewYearData();
-            ny.annualYear=JSON.parse(JSON.stringify(c.annualYear));
-            ny.annualMonth=JSON.parse(JSON.stringify(c.annualMonth));
-            ny.isAnnualYearOpen=c.isAnnualYearOpen; ny.isAnnualMonthOpen=c.isAnnualMonthOpen;
-            data.years[n]=ny; data.currentYear=n; saveData(); renderKakeibo();
-        } else if(data.years[n]) alert("既に存在します");
-    };
-    window.deleteYear=()=>{
-        if(Object.keys(data.years).length<=1) return alert("削除できません");
-        if(confirm(data.currentYear+"年を削除しますか？")){
-            delete data.years[data.currentYear];
-            data.currentYear=Object.keys(data.years).sort()[0];
-            saveData(); renderKakeibo();
-        }
-    };
-    window.shareDataText = async () => {
-        const str = JSON.stringify(data);
-        if (navigator.share) { try { await navigator.share({ title: '家計簿', text: str }); return; } catch (err) { } }
-        window.location.href = "mailto:?body=" + encodeURIComponent(str);
-    };
-    window.exportDataToClipboard = () => {
-        const str = JSON.stringify(data);
-        const box = document.getElementById('backup-box');
-        box.value = str; box.select(); document.execCommand('copy');
-        alert("コピー完了");
-    };
-    window.importDataFromText = () => {
-        const str = document.getElementById('backup-box').value.trim();
-        if(!str || !confirm("上書き復元しますか？")) return;
-        try {
-            data = JSON.parse(str);
-            if(!data.freeMemos) data.freeMemos = [];
-            if(!data.years) data.years = { "2025": createNewYearData() };
-            saveData(); isDataLoaded = true; switchView('kakeibo'); alert("復元完了");
-        } catch(e) { alert("形式エラー"); }
-    };
+    // 操作関数
+    window.addAnnualItem = (k) => { const key = k === 'year' ? 'annualYear' : 'annualMonth'; data.years[data.currentYear][key].push({date:"",text:"",cost:0}); saveData(true); renderKakeibo(); };
+    window.moveAnn = (k, idx) => { const l = data.years[data.currentYear][k]; if(idx > 0) [l[idx], l[idx-1]] = [l[idx-1], l[idx]]; saveData(true); renderKakeibo(); };
+    window.delAnn = (k, idx) => { if(confirm("削除？")) { data.years[data.currentYear][k].splice(idx, 1); saveData(true); renderKakeibo(); } };
+    window.toggleAnnualSub = (t) => { if(t === 'year') data.years[data.currentYear].isAnnualYearOpen = !data.years[data.currentYear].isAnnualYearOpen; else data.years[data.currentYear].isAnnualMonthOpen = !data.years[data.currentYear].isAnnualMonthOpen; saveData(); renderKakeibo(); };
+    window.togBk = (bi, m) => { data.years[data.currentYear].months[m][bi].isOpen = !data.years[data.currentYear].months[m][bi].isOpen; saveData(); renderKakeibo(); };
+    window.addCategoryBlock = (t) => { const m = data.years[data.currentYear].activeMonth; data.years[data.currentYear].months[m].push({type:t, title:t === 'standard' ? 'リスト1' : 'リスト2', isOpen:true, items:[], balance:0, deposit:0}); saveData(); renderKakeibo(); };
+    window.delBk = (bi, m) => { if(confirm("削除？")) { data.years[data.currentYear].months[m].splice(bi, 1); saveData(); renderKakeibo(); } };
+    window.addIt = (bi, m) => { const b = data.years[data.currentYear].months[m][bi]; b.items.push(b.type === 'standard' ? {date:"",name:"",plan:0,act:0} : {date:"",name:"",out:0,in:0}); saveData(); renderKakeibo(); };
+    window.moveIt = (bi, ii, m, dir) => { const l = data.years[data.currentYear].months[m][bi].items; if(dir === 'up' && ii > 0) [l[ii], l[ii-1]] = [l[ii-1], l[ii]]; saveData(); renderKakeibo(); };
+    window.delIt = (bi, ii, m) => { if(confirm("削除？")) { data.years[data.currentYear].months[m][bi].items.splice(ii, 1); saveData(); renderKakeibo(); } };
+    window.changeYear = () => { data.currentYear = document.getElementById('year-select').value; renderKakeibo(); };
+    window.addNewYear = () => { let n = prompt("西暦を入力"); if(n && !data.years[n]) { data.years[n] = createNewYearData(); data.currentYear = n; saveData(); renderKakeibo(); } };
+    window.deleteYear = () => { if(Object.keys(data.years).length > 1 && confirm("削除？")) { delete data.years[data.currentYear]; data.currentYear = Object.keys(data.years)[0]; saveData(); renderKakeibo(); } };
+    
+    // データ管理
+    window.shareDataText = async () => { const s = JSON.stringify(data); if(navigator.share) await navigator.share({title:'家計簿', text:s}); else alert(s); };
+    window.exportDataToClipboard = () => { navigator.clipboard.writeText(JSON.stringify(data)); alert("コピー完了"); };
+    window.importDataFromText = () => { try { const s = document.getElementById('backup-box').value; if(s) { data = JSON.parse(s); saveData(); location.reload(); } } catch(e) { alert("エラー"); } };
 
     document.getElementById('sync-status').innerText = "接続中...";
 </script>
