@@ -11,17 +11,17 @@
 
 <style>
     /* ----------------------------------------------------
-        デザインスタイル (V8.05 調整版)
+        デザインスタイル (V7.09 完全準拠)
        ---------------------------------------------------- */
     body { 
         font-family: sans-serif; margin: 0; padding: 0; 
         background: #121212; color: #e0e0e0; 
         padding-bottom: 50px; 
         padding-top: calc(90px + env(safe-area-inset-top)); 
-        user-select: none;
+        user-select: none; 
     }
 
-    /* ログイン画面用スタイル */
+    /* ログイン画面 (V8追加) */
     #login-screen {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: #121212; z-index: 3000;
@@ -66,30 +66,75 @@
     .view-section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* --- テーブルレイアウト --- */
-    table { width: 100%; border-collapse: separate; border-spacing: 0 4px; table-layout: fixed; font-size: 0.95em; }
+    /* --- テーブルレイアウト調整 --- */
+    table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0 4px; 
+        table-layout: fixed; 
+        font-size: 0.95em; 
+    }
     th { color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 2px; }
     td { vertical-align: top; padding: 0 1px; }
-    .col-date { width: 54px; } .col-money { width: 70px; } .col-btn { width: 28px; }
+
+    .col-date { width: 54px; }
+    .col-money { width: 70px; }
+    .col-btn { width: 28px; }
     
-    input, textarea { box-sizing: border-box; border: 1px solid #444; background: #2a2a2a; border-radius: 3px; color: #fff; font-size: 1.1em; padding: 2px; }
-    textarea.kakeibo-text { width: 100%; color: #eee; resize: none; line-height: 1.4em; min-height: 2.2em; white-space: pre-wrap; word-break: break-all; overflow: hidden; vertical-align: middle; padding: 4px 2px; }
+    input, textarea { 
+        box-sizing: border-box; border: 1px solid #444; 
+        background: #2a2a2a; border-radius: 3px; 
+        color: #fff; font-size: 1.1em; padding: 2px; 
+    }
+    
+    textarea.kakeibo-text { 
+        width: 100%; 
+        color: #eee; 
+        resize: none; 
+        line-height: 1.4em;
+        min-height: 2.2em;
+        white-space: pre-wrap; 
+        word-break: break-all;
+        overflow: hidden;
+        vertical-align: middle;
+        padding: 4px 2px;
+    }
+    
     input { height: 2.2em; }
-    input.day-input { text-align: center; width: 100%; font-family: monospace; font-weight: bold; }
-    input.money-input { text-align: right; color: #80d8ff; width: 100%; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 2px; font-size: 1.0em; }
+    input.day-input { text-align: center; width: 100%; font-family: monospace; font-weight: bold; padding: 2px 0; }
+    input.date-input { text-align: center; width: 100%; font-family: monospace; font-weight: bold; padding: 0; }
+    input.money-input { 
+        text-align: right; color: #80d8ff; width: 100%; 
+        font-family: monospace; font-weight: bold; letter-spacing: -0.5px; 
+        padding-right: 2px; font-size: 1.0em; 
+    }
     
-    .mini-btn { width: 100%; height: 2.2em; display: flex; align-items: center; justify-content: center; font-size: 1.0em; cursor: pointer; border: 1px solid #555; border-radius: 3px; }
+    .mini-btn {
+        width: 100%; height: 2.2em;
+        padding: 0; margin: 0;
+        border-radius: 3px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.0em; cursor: pointer;
+        border: 1px solid #555;
+    }
     .btn-up { background: #333; color: #81c784; font-weight: bold; }
     .btn-del { background: #333; color: #e57373; font-weight: bold; }
 
     /* --- メモ帳スタイル --- */
-    .memo-card { background: #202020; border: 1px solid #333; border-radius: 8px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+    .memo-card {
+        background: #202020; border: 1px solid #333; border-radius: 8px;
+        padding: 12px 15px; margin-bottom: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: all 0.2s ease;
+    }
     .memo-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
     .memo-card-title { font-weight: bold; color: #81c784; font-size: 1.2em; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px; }
     .memo-ctrl-btns { display: flex; gap: 5px; align-items: center; }
-    .btn-edit-mode { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.9em; cursor: pointer; }
-    .btn-icon { background: #333; color: #aaa; border: 1px solid #555; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
-    .btn-toggle-memo { background: #1b5e20; color: #fff; border: 1px solid #4caf50; border-radius: 4px; width: 32px; height: 32px; font-weight: bold; font-size: 1.2em; display: flex; align-items: center; justify-content: center; }
+    
+    .btn-edit-mode { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; }
+    .btn-icon { background: #333; color: #aaa; border: 1px solid #555; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; }
+    .btn-toggle-memo { background: #1b5e20; color: #fff; border: 1px solid #4caf50; border-radius: 4px; width: 32px; height: 32px; font-weight: bold; font-size: 1.2em; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
     .memo-card-body { font-family: 'Consolas', 'Monaco', monospace; color: #e0e0e0; font-size: 1.05em; line-height: 1.5; white-space: pre-wrap; word-break: break-all; border-top: 1px dashed #444; margin-top: 8px; padding-top: 8px; }
     .memo-card-body.collapsed { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #888; border-top: none; }
 
@@ -104,23 +149,39 @@
     .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
     .btn-red { background: #c62828; color: #fff; border: 1px solid #e57373; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
     .btn-backup { background: #1565c0; color: #fff; border: 1px solid #42a5f5; border-radius: 4px; padding: 12px; font-size: 1.1em; width: 100%; margin-bottom: 15px; cursor: pointer; }
-    .btn-backup-sub { background: #424242; color: #ccc; border: 1px solid #666; border-radius: 4px; padding: 12px; font-size: 1.1em; width: 100%; margin-bottom: 15px; }
-    .add-row-btn { width: 100%; padding: 10px; margin-top: 5px; background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; font-size: 1.1em; }
-    input.summary-input { text-align: right; color: #80d8ff; width: 120px; height: 2.5em; font-family: monospace; font-weight: bold; background: #333; border: 1px solid #555; border-radius: 4px; font-size: 1.3em; padding-right: 6px; }
+    .btn-backup-sub { background: #424242; color: #ccc; border: 1px solid #666; border-radius: 4px; padding: 12px; font-size: 1.1em; width: 100%; margin-bottom: 15px; cursor: pointer; }
+    .btn-year-ctrl { padding: 6px 12px; font-size: 0.9em; border-radius: 4px; color: #fff; margin-left: 5px; cursor: pointer; }
+    .bg-green { background: #2e7d32; border: 1px solid #4caf50; }
+    .bg-red { background: #c62828; border: 1px solid #e57373; }
+    .btn-toggle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; width: 34px; height: 34px; font-weight: bold; font-size: 1.2em; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; }
+    .add-row-btn { width: 100%; padding: 10px; margin-top: 5px; background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; font-size: 1.1em; cursor: pointer; }
+    
+    input.summary-input { text-align: right; color: #80d8ff; width: 120px; height: 2.5em; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 6px; font-size: 1.3em; background: #333; border: 1px solid #555; border-radius: 4px; }
+    @media screen and (max-width: 480px) { input.summary-input { width: 100%; font-size: 1.2em; } }
+    
     #annual-section { background: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333; }
-    .annual-group { margin-bottom: 30px; }
-    .annual-header { font-weight: bold; color: #fff; border-bottom: 2px solid #2e7d32; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .annual-group { margin-bottom: 30px; } 
+    .annual-header { font-weight: bold; color: #fff; border-bottom: 2px solid #2e7d32; margin-bottom: 10px; padding-bottom: 2px; font-size: 1.2em; display: flex; justify-content: space-between; align-items: center; }
     .year-controls { background: #1f1f1f; padding: 10px; margin: 15px 0; border-radius: 5px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    select { font-size: 1.2em; padding: 5px; background: #333; color: #fff; border: 1px solid #555; }
     .month-selector { display: flex; overflow-x: auto; background: #000; margin-bottom: 15px; border: 1px solid #333; padding: 5px 0; }
-    .month-btn { flex: 0 0 auto; padding: 12px 18px; color: #888; border-right: 1px solid #222; }
+    .month-btn { flex: 0 0 auto; padding: 12px 18px; color: #888; border-right: 1px solid #222; cursor: pointer; }
     .month-btn.active { background: #2e7d32; color: #fff; font-weight: bold; border: 1px solid #fff; border-radius: 2px; }
-    .category-block { background: #1e1e1e; padding: 10px; margin-bottom: 25px; border-radius: 5px; border: 1px solid #333; }
-    .cat-header { display: flex; justify-content: space-between; align-items: center; background: #2c2c2c; padding: 8px; border-radius: 3px; border: 1px solid #444; }
-    .cat-title-input { font-weight: bold; border: none !important; background: transparent !important; font-size: 1.4em; width: 60%; color: #fff; }
-    .summary-area { display: flex; align-items: center; justify-content: space-around; background: #252525; padding: 10px 5px; margin-bottom: 10px; border: 1px solid #383838; }
-    .total-val-box { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; text-align: right; color: #fff; font-weight: bold; font-family: monospace; font-size: 1.05em; padding: 4px; display: flex; align-items: center; justify-content: flex-end; }
+    .category-block { background: #1e1e1e; padding: 10px; margin-bottom: 25px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #333; }
+    .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2c2c2c; padding: 8px; border-radius: 3px; border: 1px solid #444; }
+    .cat-title-input { font-weight: bold; border: none !important; background: transparent !important; font-size: 1.4em; width: 60%; color: #fff; padding: 0; }
+    .summary-area { display: flex; align-items: center; justify-content: space-around; background: #252525; padding: 10px 5px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #383838; }
+    .summary-item { display: flex; align-items: center; }
+    .summary-label { font-size: 1.1em; color: #ccc; margin-right: 10px; white-space: nowrap; }
+    
+    .add-block-area { text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 20px; }
+    .big-btn { background: #2e7d32; color: #fff; padding: 14px 24px; border: 1px solid #4caf50; border-radius: 5px; font-size: 1.1em; margin: 5px; width: 85%; cursor: pointer; }
+    .hidden { display: none !important; }
+    .total-row td { vertical-align: middle; }
+    .total-val-box { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; text-align: right; color: #fff; font-weight: bold; font-family: monospace; font-size: 1.05em; padding: 4px; height: 2.0em; display: flex; align-items: center; justify-content: flex-end; letter-spacing: -0.5px; }
+    .total-label { text-align: center; font-weight: bold; color: #fff; background: transparent; border: none; font-size: 1.1em; }
+
     #sync-status { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#aaa; background:#222; padding:4px 8px; border-radius:4px; opacity:0.7; z-index:9999; }
-    .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -137,7 +198,7 @@
 
 <div id="main-app" style="display:none;">
     <div class="header-area">
-        <div class="app-title-bar">家計簿 (V8.05)</div>
+        <div class="app-title-bar">家計簿 (V8.06)</div>
         <div class="top-tabs">
             <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
             <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
@@ -166,12 +227,24 @@
             <h2>固定費</h2>
             <div id="annual-section">
                 <div class="annual-group">
-                    <div class="annual-header"><span>年間</span><button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button></div>
-                    <div id="content-annual-year"><div id="annual-table-year"></div><button class="add-row-btn" onclick="addAnnualItem('year')">追加</button></div>
+                    <div class="annual-header">
+                        <span>年間</span>
+                        <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+                    </div>
+                    <div id="content-annual-year">
+                        <div id="annual-table-year"></div>
+                        <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
+                    </div>
                 </div>
                 <div class="annual-group">
-                    <div class="annual-header"><span>月間</span><button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button></div>
-                    <div id="content-annual-month"><div id="annual-table-month"></div><button class="add-row-btn" onclick="addAnnualItem('month')">追加</button></div>
+                    <div class="annual-header">
+                        <span>月間</span>
+                        <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
+                    </div>
+                    <div id="content-annual-month">
+                        <div id="annual-table-month"></div>
+                        <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,27 +253,31 @@
             <div class="year-controls">
                 <select id="year-select" onchange="changeYear()"></select>
                 <div>
-                    <button class="btn-year-ctrl btn-green" onclick="addNewYear()">追加</button>
-                    <button class="btn-year-ctrl btn-red" onclick="deleteYear()">削除</button>
+                    <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
+                    <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
                 </div>
             </div>
             <div class="month-selector" id="month-tabs"></div>
             <h2 id="monthly-header-title">1月の収支</h2> 
             <div id="monthly-container"></div>
-            <div class="add-block-area" style="margin-top:20px; display:flex; gap:10px;">
-                <button class="add-row-btn" style="flex:1;" onclick="addCategoryBlock('standard')">リスト1を追加</button>
-                <button class="add-row-btn" style="flex:1;" onclick="addCategoryBlock('detail')">リスト2を追加</button>
+            <div class="add-block-area">
+                <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
+                <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
             </div>
         </div>
 
         <div id="view-save" class="view-section">
             <div class="settings-menu">
                 <h2 style="border:none; justify-content:center;">データ管理</h2>
+                <p style="color:#aaa; font-size:0.9em; margin-bottom:15px; text-align:left;">
+                    【書き出し】データを「文字」として保存・共有します。<br>
+                    【読み込み】保存した文字を貼り付けて復元します。
+                </p>
                 <button class="btn-backup" onclick="shareDataText()">📤 データを書き出し (共有)</button>
                 <button class="btn-backup" style="background:#00695c; border-color:#00897b;" onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
                 <hr style="border:0; border-top:1px solid #444; margin:20px 0;">
                 <textarea id="backup-box" style="width:100%; height:100px; background:#2a2a2a; color:#fff;" placeholder="ここにデータを貼り付けて復元"></textarea>
-                <button class="btn-backup-sub" style="width:100%; padding:12px;" onclick="importDataFromText()">📂 データを復元 (読み込み)</button>
+                <button class="btn-backup-sub" onclick="importDataFromText()">📂 データを復元 (読み込み)</button>
                 <button onclick="logout()" style="width:100%; margin-top:30px; background:#444; color:#ccc; border:none; padding:10px; cursor:pointer; border-radius:4px;">ログアウト</button>
             </div>
         </div>
@@ -210,9 +287,14 @@
 <div id="sync-status">同期待機中...</div>
 
 <script>
-    // --- 初期設定 ---
-    const VERSION = "kakeibo_V8.05";
-    
+    // --- Service Worker Cleanup (V7.09準拠) ---
+    if (window.navigator && navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) { registration.unregister(); }
+        });
+    }
+
+    // --- Firebase設定 (V8統合版) ---
     const firebaseConfig = {
         apiKey: "AIzaSyCT_VvEPzGCPRLLFnzQuwArsYn2JnUR_fg",
         authDomain: "kakeibo-app-92bb4.firebaseapp.com",
@@ -239,19 +321,7 @@
     let isDataLoaded = false;
     let editingMemoId = null;
 
-    // --- ログイン処理 ---
-    function loginWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithRedirect(provider);
-    }
-
-    function logout() {
-        if(confirm("ログアウトしますか？")) {
-            auth.signOut().then(() => { location.reload(); });
-        }
-    }
-
-    // ログイン状態の監視
+    // --- ログイン処理ロジック ---
     auth.onAuthStateChanged((user) => {
         const loginScr = document.getElementById('login-screen');
         const mainApp = document.getElementById('main-app');
@@ -266,9 +336,19 @@
         }
     });
 
+    function loginWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithRedirect(provider);
+    }
+
+    function logout() {
+        if(confirm("ログアウトしますか？")) {
+            auth.signOut().then(() => { location.reload(); });
+        }
+    }
+
     function initApp() {
         if(!dbRef) return;
-        // データのリアルタイム購読
         dbRef.on('value', (snapshot) => {
             const val = snapshot.val();
             const statusEl = document.getElementById('sync-status');
@@ -278,18 +358,17 @@
                 if(!data.years) data = JSON.parse(JSON.stringify(initialData));
                 if(!data.freeMemos) data.freeMemos = [];
             } else {
-                // DBが空の場合、ローカルバックアップを確認
                 const local = localStorage.getItem('kakeiboDataV7_Backup');
                 if(local) {
                     data = JSON.parse(local);
+                    if(!data.freeMemos) data.freeMemos = [];
+                    saveData(false);
                 } else {
                     data = JSON.parse(JSON.stringify(initialData));
                 }
-                saveData(false);
             }
             
             isDataLoaded = true;
-            // 初回表示の切り替え
             switchView(data.lastViewedTab || 'kakeibo');
             if(!document.getElementById('memo-editor').classList.contains('active')) {
                 renderMemoList(); 
@@ -300,12 +379,12 @@
                 setTimeout(() => { statusEl.innerText = ""; }, 2000);
             }
         }, (error) => {
-            console.error("Database Error:", error);
-            alert("データの同期に失敗しました。Firebaseのセキュリティルールを確認してください。");
+            console.error("Firebase Sync Error:", error);
+            document.getElementById('sync-status').innerText = "⚠ 同期失敗";
         });
     }
 
-    // --- データ保存 ---
+    // --- 保存ロジック (V7.09 完全準拠) ---
     function saveData(syncAnnual = false) {
         if(!isDataLoaded || !dbRef) return;
         if(syncAnnual) {
@@ -319,7 +398,7 @@
                 }
             });
         }
-        dbRef.set(data).catch(err => { console.error("Save Error:", err); });
+        dbRef.set(data).catch(err => { console.error("Database Save Error:", err); });
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
         const el = document.getElementById('sync-status');
         if(el) el.innerText = "↑ 送信中...";
@@ -334,7 +413,12 @@
                 { type: "detail", title: "競馬", isOpen: true, items: [] }
             ];
         }
-        return { annualYear: [], annualMonth: [], isAnnualYearOpen: true, isAnnualMonthOpen: true, activeMonth: 1, months: months };
+        return {
+            annualYear: [], annualMonth: [],
+            isAnnualYearOpen: true, isAnnualMonthOpen: true,
+            activeMonth: 1, 
+            months: months
+        };
     }
 
     window.switchView = (viewName) => {
@@ -355,144 +439,400 @@
         if(isDataLoaded) saveData();
     };
 
-    // --- メモ機能 ---
-    window.addNewMemo = () => { const id = Date.now().toString(); data.freeMemos.push({ id: id, title: "新規メモ", body: "", isOpen: true }); saveData(); openMemoEditor(id); };
+    // --- メモ帳ロジック (V7.09 完全準拠) ---
+    window.addNewMemo = () => {
+        const newId = Date.now().toString();
+        data.freeMemos.push({ id: newId, title: "新規メモ", body: "", isOpen: true });
+        saveData();
+        openMemoEditor(newId);
+    };
+
     window.renderMemoList = () => {
-        const container = document.getElementById('memo-list-container'); if(!container) return; container.innerHTML = '';
+        const container = document.getElementById('memo-list-container');
+        if(!container) return;
+        container.innerHTML = '';
         data.freeMemos.forEach((memo) => {
             if(memo.isOpen === undefined) memo.isOpen = true; 
-            const div = document.createElement('div'); div.className = 'memo-card';
-            const header = document.createElement('div'); header.className = 'memo-card-header';
-            const titleSpan = document.createElement('span'); titleSpan.className = 'memo-card-title'; titleSpan.innerText = memo.title;
-            const btnGroup = document.createElement('div'); btnGroup.className = 'memo-ctrl-btns';
-            const editBtn = document.createElement('button'); editBtn.className = 'btn-edit-mode'; editBtn.innerText = '✐ 編集';
+
+            const div = document.createElement('div');
+            div.className = 'memo-card';
+            
+            const header = document.createElement('div');
+            header.className = 'memo-card-header';
+            
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'memo-card-title';
+            titleSpan.innerText = memo.title;
+            
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'memo-ctrl-btns';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-edit-mode';
+            editBtn.innerText = '✐ 編集';
             editBtn.onclick = (e) => { e.stopPropagation(); openMemoEditor(memo.id); };
-            const upBtn = document.createElement('button'); upBtn.className = 'btn-icon'; upBtn.innerText = '↑';
+
+            const upBtn = document.createElement('button');
+            upBtn.className = 'btn-icon';
+            upBtn.innerText = '↑';
             upBtn.onclick = (e) => { e.stopPropagation(); moveMemo(memo.id, 'up'); };
-            const toggleBtn = document.createElement('button'); toggleBtn.className = 'btn-toggle-memo'; toggleBtn.innerText = memo.isOpen ? '－' : '＋';
+            
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'btn-toggle-memo';
+            toggleBtn.innerText = memo.isOpen ? '－' : '＋';
             toggleBtn.onclick = (e) => { e.stopPropagation(); toggleMemo(memo.id); };
-            btnGroup.append(editBtn, upBtn, toggleBtn); header.append(titleSpan, btnGroup);
-            const body = document.createElement('div'); body.className = 'memo-card-body';
+
+            btnGroup.append(editBtn, upBtn, toggleBtn);
+            header.append(titleSpan, btnGroup);
+            div.appendChild(header);
+
+            const body = document.createElement('div');
+            body.className = 'memo-card-body';
             if(!memo.isOpen) body.classList.add('collapsed');
-            body.innerText = memo.body; div.append(header, body); container.appendChild(div);
+            body.innerText = memo.body; 
+            div.appendChild(body);
+
+            container.appendChild(div);
         });
     };
+
     window.moveMemo = (id, direction) => {
         const index = data.freeMemos.findIndex(m => m.id === id);
-        if (direction === 'up' && index > 0) [data.freeMemos[index], data.freeMemos[index - 1]] = [data.freeMemos[index - 1], data.freeMemos[index]];
+        if (index === -1) return;
+        if (direction === 'up' && index > 0) {
+            [data.freeMemos[index], data.freeMemos[index - 1]] = [data.freeMemos[index - 1], data.freeMemos[index]];
+        }
         saveData(); renderMemoList();
     };
-    window.toggleMemo = (id) => { const m = data.freeMemos.find(m => m.id === id); if(m) { m.isOpen = !m.isOpen; saveData(); renderMemoList(); } };
+
+    window.toggleMemo = (id) => {
+        const memo = data.freeMemos.find(m => m.id === id);
+        if(memo) { memo.isOpen = !memo.isOpen; saveData(); renderMemoList(); }
+    };
+
     window.openMemoEditor = (id) => {
-        editingMemoId = id; const m = data.freeMemos.find(m => m.id === id); if(!m) return;
+        editingMemoId = id;
+        const memo = data.freeMemos.find(m => m.id === id);
+        if(!memo) return;
         document.getElementById('memo-list-view').style.display = 'none';
         document.getElementById('memo-editor').classList.add('active');
-        document.getElementById('memo-edit-title').value = m.title;
-        document.getElementById('memo-edit-body').value = m.body;
+        document.getElementById('memo-edit-title').value = memo.title;
+        document.getElementById('memo-edit-body').value = memo.body;
     };
-    window.closeMemoEditor = () => { if(!editingMemoId) return; saveCurrentMemo(); editingMemoId = null; document.getElementById('memo-editor').classList.remove('active'); document.getElementById('memo-list-view').style.display = 'block'; renderMemoList(); };
-    window.saveCurrentMemo = () => { if(!editingMemoId) return; const m = data.freeMemos.find(m => m.id === editingMemoId); if(m) { m.title = document.getElementById('memo-edit-title').value; m.body = document.getElementById('memo-edit-body').value; saveData(); } };
-    window.deleteCurrentMemo = () => { if(!confirm("削除しますか？")) return; data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId); saveData(); editingMemoId = null; document.getElementById('memo-editor').classList.remove('active'); document.getElementById('memo-list-view').style.display = 'block'; renderMemoList(); };
 
-    // --- 家計簿レンダリング ---
+    window.closeMemoEditor = () => {
+        if(!editingMemoId) return;
+        saveCurrentMemo(); 
+        editingMemoId = null;
+        document.getElementById('memo-editor').classList.remove('active');
+        document.getElementById('memo-list-view').style.display = 'block';
+        renderMemoList();
+    };
+
+    window.saveCurrentMemo = () => {
+        if(!editingMemoId) return;
+        const memo = data.freeMemos.find(m => m.id === editingMemoId);
+        if(memo) {
+            memo.title = document.getElementById('memo-edit-title').value;
+            memo.body = document.getElementById('memo-edit-body').value;
+            saveData();
+        }
+    };
+
+    window.deleteCurrentMemo = () => {
+        if(!confirm("このメモを削除しますか？")) return;
+        data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId);
+        saveData();
+        editingMemoId = null;
+        document.getElementById('memo-editor').classList.remove('active');
+        document.getElementById('memo-list-view').style.display = 'block';
+        renderMemoList();
+    };
+
+    // --- 家計簿/固定費描画ロジック (V7.09 完全準拠) ---
     function renderKakeibo() {
-        const yearSelect = document.getElementById('year-select'); if(!yearSelect) return; yearSelect.innerHTML = '';
+        const yearSelect = document.getElementById('year-select');
+        if(!yearSelect) return;
+        yearSelect.innerHTML = '';
         const sortedYears = Object.keys(data.years).sort();
         if(sortedYears.length===0){ data.years["2025"]=createNewYearData(); data.currentYear="2025"; sortedYears.push("2025"); }
         if(!data.years[data.currentYear]) data.currentYear=sortedYears[0];
-        sortedYears.forEach(y=>{ const op=document.createElement('option'); op.value=y; op.innerText=y+"年"; if(y===data.currentYear)op.selected=true; yearSelect.appendChild(op); });
         
-        const yd = data.years[data.currentYear]; let activeMonth = yd.activeMonth || 1;
-        document.getElementById('content-annual-year').className = yd.isAnnualYearOpen!==false ? '' : 'hidden'; document.getElementById('btn-annual-year').innerText = yd.isAnnualYearOpen!==false ? '－' : '＋';
-        document.getElementById('content-annual-month').className = yd.isAnnualMonthOpen!==false ? '' : 'hidden'; document.getElementById('btn-annual-month').innerText = yd.isAnnualMonthOpen!==false ? '－' : '＋';
+        sortedYears.forEach(y=>{ 
+            const op=document.createElement('option'); op.value=y; op.innerText=y+"年"; 
+            if(y===data.currentYear)op.selected=true; 
+            yearSelect.appendChild(op); 
+        });
+
+        const yearData = data.years[data.currentYear];
+        let activeMonth = yearData.activeMonth || 1;
         
-        renderAnnualTable('annual-table-year', yd.annualYear, 'annualYear'); renderAnnualTable('annual-table-month', yd.annualMonth, 'annualMonth');
-        
+        const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
+        if(yearData.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
+        const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
+        if(yearData.isAnnualMonthOpen!==false){ cM.classList.remove('hidden'); bM.innerText="－"; } else { cM.classList.add('hidden'); bM.innerText="＋"; }
+
+        renderAnnualTable('annual-table-year', yearData.annualYear, 'annualYear');
+        renderAnnualTable('annual-table-month', yearData.annualMonth, 'annualMonth');
+
         const tabs=document.getElementById('month-tabs'); tabs.innerHTML='';
-        for(let i=1; i<=12; i++){ const d=document.createElement('div'); d.className=`month-btn ${activeMonth===i?'active':''}`; d.innerText=i+"月"; d.onclick=()=>{ yd.activeMonth = i; saveData(); renderKakeibo(); }; tabs.appendChild(d); }
-        document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`; renderMonthlyBlocks(yd, activeMonth);
+        for(let i=1; i<=12; i++){ 
+            const d=document.createElement('div'); 
+            d.className=`month-btn ${activeMonth===i?'active':''}`;
+            d.innerText=i+"月"; 
+            d.onclick=()=>{ yearData.activeMonth = i; saveData(); renderKakeibo(); }; 
+            tabs.appendChild(d);
+        }
+        document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`;
+        renderMonthlyBlocks(yearData, activeMonth);
     }
 
     function renderAnnualTable(cid, list, key) {
-        const c=document.getElementById(cid); if(!c) return; c.innerHTML=''; const t=document.createElement('table');
+        const c=document.getElementById(cid); if(!c) return; c.innerHTML='';
+        const t=document.createElement('table');
         t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-        const tb=document.createElement('tbody'); (list||[]).forEach((item,idx)=>{
-            const tr=document.createElement('tr'); const tdD=document.createElement('td'); 
+        const tb=document.createElement('tbody');
+        if(!list) list = []; 
+        list.forEach((item,idx)=>{
+            const tr=document.createElement('tr'); 
+            const tdD=document.createElement('td'); 
             if(key==='annualYear') tdD.appendChild(createInp(item.date, v=>updAnn(key,idx,'date',v), 'date'));
             else { const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center"; w.append(createInp(item.date, v=>updAnn(key,idx,'date',v), 'day'), createSuf("日")); tdD.appendChild(w); }
+            
             const tdTx=document.createElement('td'); tdTx.appendChild(createTxt(item.text, v=>updAnn(key,idx,'text',v)));
             const tdC=document.createElement('td'); tdC.appendChild(createMon(item.cost, v=>updAnn(key,idx,'cost',v)));
             const tdUp=document.createElement('td'); if(idx > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx},'up')">↑</button>`;
             const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
-            tr.append(tdD,tdTx,tdC,tdUp,tdDel); tb.appendChild(tr); 
-        }); t.appendChild(tb); c.appendChild(t);
+            
+            tr.append(tdD,tdTx,tdC,tdUp,tdDel); 
+            tb.appendChild(tr); 
+        });
+        t.appendChild(tb); c.appendChild(t);
     }
 
     function renderMonthlyBlocks(yd, month) {
         const c=document.getElementById('monthly-container'); if(!c) return; c.innerHTML='';
-        (yd.months[month]||[]).forEach((b,bi)=>{
+        if(!yd.months[month]) yd.months[month] = [];
+        
+        yd.months[month].forEach((b,bi)=>{
             const d=document.createElement('div'); d.className='category-block';
-            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" style="background:#333;color:#fff;border:1px solid #555;border-radius:3px;margin-left:5px;width:30px;height:30px;" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
-            const contentDiv = document.createElement('div'); if(b.isOpen===false) contentDiv.classList.add('hidden');
-            if(b.type==='standard'){
+            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
+            const contentDiv = document.createElement('div'); 
+            if(b.isOpen===false) contentDiv.classList.add('hidden');
+            
+            if(b.type==='standard') {
+                if(b.balance === undefined) b.balance = 0;
+                if(b.deposit === undefined) b.deposit = 0;
                 const summaryDiv = document.createElement('div'); summaryDiv.className = 'summary-area';
-                summaryDiv.innerHTML = `<div class="summary-item"><div class="summary-label">残高</div></div><div class="summary-item"><div class="summary-label">入れる額</div></div>`;
-                summaryDiv.children[0].appendChild(createMon(b.balance, v=>updBkVal(bi, 'balance', v, month), null, true));
-                summaryDiv.children[1].appendChild(createMon(b.deposit, v=>updBkVal(bi, 'deposit', v, month), null, true));
-                contentDiv.appendChild(summaryDiv);
+                const item1 = document.createElement('div'); item1.className = 'summary-item';
+                const label1 = document.createElement('div'); label1.className = 'summary-label'; label1.innerText = '残高';
+                item1.append(label1, createMon(b.balance, v=>updBkVal(bi, 'balance', v, month), null, true));
+                const item2 = document.createElement('div'); item2.className = 'summary-item';
+                const label2 = document.createElement('div'); label2.className = 'summary-label'; label2.innerText = '入れる額';
+                item2.append(label2, createMon(b.deposit, v=>updBkVal(bi, 'deposit', v, month), null, true));
+                summaryDiv.append(item1, item2); contentDiv.appendChild(summaryDiv);
             }
+
             const t=document.createElement('table'); const tb=document.createElement('tbody');
-            if(b.type==='standard') t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">予定</th><th class="col-money">確定</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-            else t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>項目</th><th class="col-money">出</th><th class="col-money">入</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-            (b.items||[]).forEach((it,ii)=>{
-                const tr=document.createElement('tr'); const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
+            if(b.type==='standard') {
+                t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">予定額</th><th class="col-money">確定額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+            } else {
+                t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+            }
+            const items = b.items || [];
+            items.forEach((it,ii)=>{
+                const tr=document.createElement('tr');
+                const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
                 w.append(createInp(it.date, v=>updIt(bi,ii,'date',v,month), 'day'), createSuf("日")); tdD.appendChild(w);
-                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v,month))); tr.append(tdD, tdN);
-                if(b.type==='standard'){ tr.append(createMonTd(it.plan, v=>updIt(bi,ii,'plan',v,month), bi, month), createMonTd(it.act, v=>updIt(bi,ii,'act',v,month), bi, month)); }
-                else { tr.append(createMonTd(it.out, v=>updIt(bi,ii,'out',v,month), bi, month), createMonTd(it.in, v=>updIt(bi,ii,'in',v,month), bi, month)); }
+                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v,month)));
+                tr.append(tdD, tdN);
+                
+                if(b.type==='standard'){
+                    tr.append(createMonTd(it.plan, v=>updIt(bi,ii,'plan',v,month), bi, month), createMonTd(it.act, v=>updIt(bi,ii,'act',v,month), bi, month));
+                } else {
+                    tr.append(createMonTd(it.out, v=>updIt(bi,ii,'out',v,month), bi, month), createMonTd(it.in, v=>updIt(bi,ii,'in',v,month), bi, month));
+                }
+                
                 const tdUp=document.createElement('td'); if(ii > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${month},'up')">↑</button>`;
                 const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${month})">×</button>`;
-                tr.append(tdUp, tdDel); tb.appendChild(tr); 
+                tr.append(tdUp, tdDel);
+                tb.appendChild(tr); 
             });
-            const trTotal = document.createElement('tr'); trTotal.className = 'total-row'; let s1=0, s2=0;
-            if(b.type==='standard'){ (b.items||[]).forEach(i=>{s1+=Number(i.plan);s2+=Number(i.act)}); trTotal.innerHTML=`<td class="total-label">合計</td><td></td><td><div class="total-val-box">${formatNum(s1)}</div></td><td><div class="total-val-box">${formatNum(s2)}</div></td><td colspan="2"></td>`; }
-            else { (b.items||[]).forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)}); trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box">${formatNum(s1)}</div></td><td><div class="total-val-box">${formatNum(s2)}</div></td><td colspan="2"></td>`; }
-            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.append(t, createAddRowBtn(()=>addIt(bi, month))); d.appendChild(contentDiv); c.appendChild(d);
+
+            const trTotal = document.createElement('tr'); trTotal.className = 'total-row';
+            let s1=0, s2=0;
+            if(b.type==='standard'){ 
+                items.forEach(i=>{s1+=Number(i.plan);s2+=Number(i.act)});
+                trTotal.innerHTML=`<td class="total-label">合計</td><td></td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; 
+            } else { 
+                items.forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)});
+                trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; 
+            }
+            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.append(t, createAddRowBtn(()=>addIt(bi, month)));
+            d.appendChild(contentDiv); c.appendChild(d);
         });
     }
 
-    // --- 各種ヘルパー関数 ---
-    function createMonTd(val, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(val, cb, ()=>updateTotalDisplay(bi,m))); return td; }
-    function updateTotalDisplay(bIdx, month) { renderKakeibo(); }
-    function createInp(val, cb, type) { const i=document.createElement('input'); i.value=val||""; if(type==='date') i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; else { i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); i.oninput=function(){let v=this.value.replace(/[^0-9]/g,'');if(Number(v)>31)v="31";this.value=v;}; i.onblur=function(){ cb(this.value); }; } return i; }
-    function createTxt(v,cb){ const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.oninput=function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';}; t.onblur=function(){cb(this.value);}; setTimeout(()=>t.oninput(),0); return t; }
-    function createMon(v, cb, bCb, isBig = false){ const i=document.createElement('input'); i.type="tel"; i.className = isBig ? "summary-input" : "money-input"; i.value = v ? Number(v).toLocaleString() : ""; i.onfocus=function(){this.value=this.value.replace(/,/g,'');this.select();}; i.oninput=function(){let r=this.value.replace(/[^0-9\-]/g,'');if(r.lastIndexOf('-')>0)r=r.replace(/-/g,'');this.value=r;}; i.onblur=function(){let val=parseFloat(this.value.replace(/,/g,''));if(isNaN(val)||val===0){cb(0);this.value="";}else{let n=Math.max(-999999,Math.min(999999,val));cb(n);this.value=n.toLocaleString();}if(bCb) bCb();}; return i; }
+    // --- 各種パーツ生成ヘルパー (V7.09 完全準拠) ---
+    function createMonTd(v, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(v, cb, ()=>updateTotalDisplay(bi,m))); return td; }
+    function updateTotalDisplay(bIdx, month) {
+        const block = data.years[data.currentYear].months[month][bIdx];
+        let s1=0, s2=0;
+        const items = block.items || [];
+        if(block.type === 'standard') { items.forEach(i => { s1 += Number(i.plan); s2 += Number(i.act); }); } 
+        else { items.forEach(i => { s1 += Number(i.out); s2 += Number(i.in); }); }
+        const el1 = document.getElementById(`t1-${bIdx}`);
+        const el2 = document.getElementById(`t2-${bIdx}`);
+        if(el1) el1.innerText = formatNum(s1);
+        if(el2) el2.innerText = formatNum(s2);
+    }
+
+    function createInp(val, cb, type) {
+        const i=document.createElement('input'); i.value=val||"";
+        if(type==='date') { 
+            i.className="date-input"; i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; 
+        } else { 
+            i.type="tel"; i.className="day-input"; i.setAttribute("maxlength","2"); 
+            i.oninput=function(){
+                let v=this.value.replace(/[^0-9]/g,'');
+                if(Number(v)>31)v="31";
+                if(this.value!==v)this.value=v;
+            };
+            i.onblur=function(){ cb(this.value); };
+        }
+        return i;
+    }
+    function createSuf(t){const s=document.createElement('span');s.className="day-suffix";s.innerText=t;return s;}
+    function autoResize(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+    function createTxt(v,cb){
+        const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.rows=1;
+        t.oninput=function(){ autoResize(this); }; 
+        t.onblur=function(){ cb(this.value); };
+        setTimeout(() => autoResize(t), 0);
+        return t;
+    }
+    function createMon(v, cb, bCb, isBig = false){
+        const i=document.createElement('input');
+        i.type="tel"; i.className = isBig ? "summary-input" : "money-input";
+        i.value = (v === 0 || v === "0") ? "" : Number(v).toLocaleString();
+        i.onfocus=function(){ this.value=this.value.replace(/,/g,''); this.select(); };
+        i.oninput=function(){
+             let raw = this.value.replace(/[^0-9\-]/g, '');
+             if(raw.lastIndexOf('-') > 0) raw = raw.replace(/-/g, '');
+             const isMinus = raw.startsWith('-');
+             let numPart = isMinus ? raw.slice(1) : raw;
+             if(numPart.length > 6) { numPart = numPart.slice(0, 6); raw = isMinus ? '-' + numPart : numPart; }
+             if(this.value !== raw) this.value = raw;
+        };
+        i.onblur=function(){
+            let val = this.value.replace(/,/g,'').replace(/[０-９]/g,s=>String.fromCharCode(s.charCodeAt(0)-0xFEE0));
+            val = val.replace(/[^0-9\-]/g, '');
+            const n = parseFloat(val); 
+            if (isNaN(n) || n === 0) { cb(0); this.value = ""; } 
+            else { 
+                if(n > 999999) { cb(999999); this.value = "999,999"; }
+                else if(n < -999999) { cb(-999999); this.value = "-999,999"; }
+                else { cb(n); this.value = n.toLocaleString(); }
+            }
+            if(bCb) bCb();
+        };
+        return i;
+    }
     function createAddRowBtn(fn){ const b=document.createElement('button'); b.className='add-row-btn'; b.innerText='追加'; b.onclick=fn; return b; }
-    function createSuf(t){const s=document.createElement('span');s.style.fontSize="0.8em";s.innerText=t;return s;}
-    function formatDateAnnual(v){const n=v.replace(/[^0-9]/g,'');if(n.length===4)return parseInt(n.slice(0,2))+"/"+parseInt(n.slice(2,4));if(n.length===3)return parseInt(n.slice(0,1))+"/"+parseInt(n.slice(1,3));return v;}
+    function formatDateAnnual(val) {
+        const nums = val.replace(/[^0-9]/g, '');
+        if (nums.length === 4) return parseInt(nums.slice(0,2)) + "/" + parseInt(nums.slice(2,4));
+        if (nums.length === 3) return parseInt(nums.slice(0,1)) + "/" + parseInt(nums.slice(1,3));
+        return val;
+    }
     function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
 
-    // --- イベントハンドラ ---
-    window.addAnnualItem=(k)=>{ const l=(k==='year'?'annualYear':'annualMonth'); data.years[data.currentYear][l].push({date:"",text:"",cost:0}); saveData(true); renderKakeibo(); };
-    window.moveAnn=(k,idx,dir)=>{ const list=data.years[data.currentYear][k]; if(dir==='up'&&idx>0)[list[idx],list[idx-1]]=[list[idx-1],list[idx]]; saveData(true); renderKakeibo(); };
+    // --- 操作ロジック ---
+    window.addAnnualItem = (k) => {
+        const l = (k === 'year' || k === 'annualYear') ? 'annualYear' : 'annualMonth';
+        if (!data.years[data.currentYear][l]) data.years[data.currentYear][l] = [];
+        data.years[data.currentYear][l].push({ date: "", text: "", cost: 0 });
+        saveData(true); renderKakeibo();
+    };
+    window.moveAnn = (key, idx, dir) => {
+        const list = data.years[data.currentYear][key];
+        if(!list) return;
+        if(dir === 'up' && idx > 0) [list[idx], list[idx-1]] = [list[idx-1], list[idx]];
+        saveData(true); renderKakeibo();
+    };
     window.updAnn=(l,i,k,v)=>{data.years[data.currentYear][l][i][k]=v;saveData(true)};
     window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);renderKakeibo()};
-    window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);renderKakeibo()};
-    window.togBk=(i,m)=>{data.years[data.currentYear].months[m][i].isOpen=!data.years[data.currentYear].months[m][i].isOpen;saveData();renderKakeibo()};
-    window.addCategoryBlock=(t)=>{ const m=data.years[data.currentYear].activeMonth||1; data.years[data.currentYear].months[m].push({type:t,title:t==='standard'?'リスト1':'リスト2',isOpen:true,items:[],balance:0,deposit:0}); saveData(); renderKakeibo(); };
-    window.delBk=(i,m)=>{if(confirm("削除？")){data.years[data.currentYear].months[m].splice(i,1);saveData();renderKakeibo()}};
-    window.updBkTi=(i,v,m)=>{data.years[data.currentYear].months[m][i].title=v;saveData()};
-    window.updBkVal=(i,k,v,m)=>{data.years[data.currentYear].months[m][i][k]=v;saveData()};
-    window.addIt=(i,m)=>{ const b=data.years[data.currentYear].months[m][i]; if(!b.items)b.items=[]; b.items.push(b.type==='standard'?{date:"",name:"",plan:0,act:0}:{date:"",name:"",out:0,in:0}); saveData(); renderKakeibo(); };
-    window.moveIt=(bi,ii,m,dir)=>{ const list=data.years[data.currentYear].months[m][bi].items; if(dir==='up'&&ii>0)[list[ii],list[ii-1]]=[list[ii-1],list[ii]]; saveData(); renderKakeibo(); };
-    window.updIt=(b,i,k,v,m)=>{data.years[data.currentYear].months[m][b].items[i][k]=v;saveData()};
-    window.delIt=(b,i,m)=>{data.years[data.currentYear].months[m][b].items.splice(i,1);saveData();renderKakeibo()};
+    window.toggleAnnualSub=(t)=>{
+        if(t==='year') data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;
+        else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;
+        saveData(true); renderKakeibo();
+    };
+    window.togBk=(i, m)=>{data.years[data.currentYear].months[m][i].isOpen=!data.years[data.currentYear].months[m][i].isOpen;saveData();renderKakeibo()};
+    window.addCategoryBlock=(t)=>{
+        const m = data.years[data.currentYear].activeMonth || 1;
+        data.years[data.currentYear].months[m].push({type:t,title:t==='standard'?'リスト1':'リスト2',isOpen:true,items:[], balance:0, deposit:0});
+        saveData();renderKakeibo();
+    };
+    window.delBk=(i, m)=>{if(confirm("削除？")){data.years[data.currentYear].months[m].splice(i,1);saveData();renderKakeibo()}};
+    window.updBkTi=(i,v, m)=>{data.years[data.currentYear].months[m][i].title=v;saveData()};
+    window.updBkVal=(i,key,v, m)=>{data.years[data.currentYear].months[m][i][key]=v;saveData()};
+    window.addIt=(i, m)=>{
+        const b=data.years[data.currentYear].months[m][i];
+        if(!b.items) b.items = []; 
+        if(b.type==='standard')b.items.push({date:"",name:"",plan:0,act:0});else b.items.push({date:"",name:"",out:0,in:0});
+        saveData();renderKakeibo();
+    };
+    window.moveIt = (bIdx, iIdx, m, dir) => {
+        const list = data.years[data.currentYear].months[m][bIdx].items;
+        if(!list) return;
+        if(dir === 'up' && iIdx > 0) [list[iIdx], list[iIdx-1]] = [list[iIdx-1], list[iIdx]];
+        saveData(); renderKakeibo();
+    };
+    window.updIt=(b,i,k,v, m)=>{data.years[data.currentYear].months[m][b].items[i][k]=v;saveData()};
+    window.delIt=(b,i, m)=>{data.years[data.currentYear].months[m][b].items.splice(i,1);saveData();renderKakeibo()};
     window.changeYear=()=>{data.currentYear=document.getElementById('year-select').value;renderKakeibo()};
-    window.addNewYear=()=>{const n=prompt("西暦は？(例:2026)");if(n&&!data.years[n]){data.years[n]=createNewYearData();data.currentYear=n;saveData();renderKakeibo()}else if(data.years[n])alert("既に存在します")};
-    window.deleteYear=()=>{if(Object.keys(data.years).length>1&&confirm("現在の年データを削除しますか？")){delete data.years[data.currentYear];data.currentYear=Object.keys(data.years).sort()[0];saveData();renderKakeibo()}};
-    window.shareDataText=async()=>{const s=JSON.stringify(data);if(navigator.share){try{await navigator.share({title:'家計簿データ',text:s});return}catch(e){}}window.location.href="mailto:?body="+encodeURIComponent(s);};
-    window.exportDataToClipboard=()=>{const b=document.getElementById('backup-box');b.value=JSON.stringify(data);b.select();document.execCommand('copy');alert("コピーしました");};
-    window.importDataFromText=()=>{const s=document.getElementById('backup-box').value.trim();if(s&&confirm("現在のデータを上書きして復元しますか？")){try{data=JSON.parse(s);saveData();renderKakeibo();alert("完了しました")}catch(e){alert("解析エラー")}}};
+    window.addNewYear=()=>{
+        const n=prompt("追加する西暦（例: 2026）");
+        if(n && !data.years[n]){
+            const c=data.years[data.currentYear];
+            const ny=createNewYearData();
+            ny.annualYear=JSON.parse(JSON.stringify(c.annualYear));
+            ny.annualMonth=JSON.parse(JSON.stringify(c.annualMonth));
+            ny.isAnnualYearOpen=c.isAnnualYearOpen; ny.isAnnualMonthOpen=c.isAnnualMonthOpen;
+            data.years[n]=ny; data.currentYear=n; saveData(); renderKakeibo();
+        } else if(data.years[n]) alert("既に存在します");
+    };
+    window.deleteYear=()=>{
+        if(Object.keys(data.years).length<=1) return alert("削除できません");
+        if(confirm(data.currentYear+"年を削除しますか？")){
+            delete data.years[data.currentYear];
+            data.currentYear=Object.keys(data.years).sort()[0];
+            saveData(); renderKakeibo();
+        }
+    };
+    window.shareDataText = async () => {
+        const str = JSON.stringify(data);
+        if (navigator.share) { try { await navigator.share({ title: '家計簿', text: str }); return; } catch (err) { } }
+        window.location.href = "mailto:?body=" + encodeURIComponent(str);
+    };
+    window.exportDataToClipboard = () => {
+        const str = JSON.stringify(data);
+        const box = document.getElementById('backup-box');
+        box.value = str; box.select(); document.execCommand('copy');
+        alert("コピー完了");
+    };
+    window.importDataFromText = () => {
+        const str = document.getElementById('backup-box').value.trim();
+        if(!str || !confirm("上書き復元しますか？")) return;
+        try {
+            data = JSON.parse(str);
+            if(!data.freeMemos) data.freeMemos = [];
+            if(!data.years) data.years = { "2025": createNewYearData() };
+            saveData(); isDataLoaded = true; switchView('kakeibo'); alert("復元完了");
+        } catch(e) { alert("形式エラー"); }
+    };
+
+    document.getElementById('sync-status').innerText = "接続中...";
 </script>
 </body>
 </html>
