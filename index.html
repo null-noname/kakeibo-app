@@ -163,43 +163,22 @@
             <h2>固定費</h2>
             <div id="annual-section">
                 <div class="annual-group">
-                    <div class="annual-header">
-                        <span>年間</span>
-                        <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
-                    </div>
-                    <div id="content-annual-year">
-                        <div id="annual-table-year"></div>
-                        <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
-                    </div>
+                    <div class="annual-header"><span>年間</span><button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button></div>
+                    <div id="content-annual-year"><div id="annual-table-year"></div><button class="add-row-btn" onclick="addAnnualItem('year')">追加</button></div>
                 </div>
                 <div class="annual-group">
-                    <div class="annual-header">
-                        <span>月間</span>
-                        <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
-                    </div>
-                    <div id="content-annual-month">
-                        <div id="annual-table-month"></div>
-                        <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
-                    </div>
+                    <div class="annual-header"><span>月間</span><button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button></div>
+                    <div id="content-annual-month"><div id="annual-table-month"></div><button class="add-row-btn" onclick="addAnnualItem('month')">追加</button></div>
                 </div>
             </div>
         </div>
 
         <div id="view-kakeibo" class="view-section active">
-            <div class="year-controls">
-                <select id="year-select" onchange="changeYear()"></select>
-                <div>
-                    <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
-                    <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
-                </div>
-            </div>
+            <div class="year-controls"><select id="year-select" onchange="changeYear()"></select><div><button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button><button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button></div></div>
             <div class="month-selector" id="month-tabs"></div>
             <h2 id="monthly-header-title">1月の収支</h2> 
             <div id="monthly-container"></div>
-            <div class="add-block-area">
-                <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
-                <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
-            </div>
+            <div class="add-block-area"><button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button><button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button></div>
         </div>
 
         <div id="view-save" class="view-section">
@@ -219,7 +198,7 @@
 <div id="sync-status">同期待機中...</div>
 
 <script>
-    // --- 初期設定 (内部バージョン更新) ---
+    // --- 初期設定 ---
     const VERSION = "kakeibo_V8.02";
     
     const firebaseConfig = {
@@ -237,31 +216,21 @@
     const db = firebase.database();
     let dbRef = null;
 
-    const initialData = {
-        currentYear: "2025",
-        lastViewedTab: "kakeibo",
-        years: { "2025": createNewYearData() },
-        freeMemos: [] 
-    };
-
+    const initialData = { currentYear: "2025", lastViewedTab: "kakeibo", years: { "2025": createNewYearData() }, freeMemos: [] };
     let data = JSON.parse(JSON.stringify(initialData));
     let isDataLoaded = false;
     let editingMemoId = null;
 
-    // --- ログイン処理 (リダイレクト方式に変更) ---
+    // --- ログイン処理 (リダイレクト) ---
     function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
-        // APK(WebView)環境ではRedirect方式が推奨されます
         auth.signInWithRedirect(provider);
     }
 
     function logout() {
-        if(confirm("ログアウトしますか？")) {
-            auth.signOut().then(() => { location.reload(); });
-        }
+        if(confirm("ログアウトしますか？")) auth.signOut().then(() => { location.reload(); });
     }
 
-    // ログイン状態およびリダイレクト結果の監視
     auth.onAuthStateChanged((user) => {
         if (user) {
             document.getElementById('login-screen').style.display = 'none';
@@ -269,12 +238,9 @@
             dbRef = db.ref('kakeiboData');
             initApp();
         } else {
-            // リダイレクト後の結果チェック
             auth.getRedirectResult().catch((error) => {
                 if(error.code === 'auth/disallowed-useragent') {
-                    alert("このアプリ内ブラウザではGoogleログインがブロックされています。APK側のUserAgent設定を変更するか、標準ブラウザで利用してください。");
-                } else if (error.message) {
-                    alert("エラー: " + error.message);
+                    alert("APK版の制限です。ツール設定でUser-AgentをChrome等に変更して再ビルドしてください。");
                 }
             });
             document.getElementById('login-screen').style.display = 'flex';
@@ -298,14 +264,11 @@
             isDataLoaded = true;
             switchView(data.lastViewedTab || 'kakeibo');
             if(!document.getElementById('memo-editor').classList.contains('active')) renderMemoList();
-            if(statusEl) {
-                statusEl.innerText = "● 同期完了";
-                setTimeout(() => { statusEl.innerText = ""; }, 2000);
-            }
+            if(statusEl) { statusEl.innerText = "● 同期完了"; setTimeout(() => { statusEl.innerText = ""; }, 2000); }
         });
     }
 
-    // --- 保存・同期ロジック (V8.01継承) ---
+    // --- 保存・表示・操作 (V8.01と同様に動作) ---
     function saveData(syncAnnual = false) {
         if(!isDataLoaded || !dbRef) return;
         if(syncAnnual) {
@@ -314,216 +277,116 @@
                 if(y !== data.currentYear && data.years[y]) {
                     data.years[y].annualYear = JSON.parse(JSON.stringify(currentY.annualYear));
                     data.years[y].annualMonth = JSON.parse(JSON.stringify(currentY.annualMonth));
-                    data.years[y].isAnnualYearOpen = currentY.isAnnualYearOpen;
-                    data.years[y].isAnnualMonthOpen = currentY.isAnnualMonthOpen;
                 }
             });
         }
-        dbRef.set(data).catch(err => {});
+        dbRef.set(data);
         localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
-        const el = document.getElementById('sync-status');
-        if(el) el.innerText = "↑ 送信中...";
     }
 
     function createNewYearData() {
         let months = {};
-        for(let i=1; i<=12; i++){
-            months[i] = [
-                { type: "standard", title: "通帳", isOpen: true, items: [], balance: 0, deposit: 0 },
-                { type: "standard", title: "財布", isOpen: true, items: [], balance: 0, deposit: 0 },
-                { type: "detail", title: "競馬", isOpen: true, items: [] }
-            ];
-        }
+        for(let i=1; i<=12; i++){ months[i] = [ { type: "standard", title: "通帳", isOpen: true, items: [], balance: 0, deposit: 0 }, { type: "standard", title: "財布", isOpen: true, items: [], balance: 0, deposit: 0 }, { type: "detail", title: "競馬", isOpen: true, items: [] } ]; }
         return { annualYear: [], annualMonth: [], isAnnualYearOpen: true, isAnnualMonthOpen: true, activeMonth: 1, months: months };
     }
 
-    // --- 各種関数 (V8.01フル継承) ---
     window.switchView = (viewName) => {
         if(viewName !== 'memo') closeMemoEditor();
-        ['memo','fixed','kakeibo','save'].forEach(v => {
-            const tab = document.getElementById(`tab-${v}`);
-            const sec = document.getElementById(`view-${v}`);
-            if(tab) tab.classList.remove('active');
-            if(sec) sec.classList.remove('active');
-        });
-        const activeTab = document.getElementById(`tab-${viewName}`);
-        const activeSec = document.getElementById(`view-${viewName}`);
-        if(activeTab) activeTab.classList.add('active');
-        if(activeSec) activeSec.classList.add('active');
-        data.lastViewedTab = viewName; 
-        if(viewName === 'kakeibo' || viewName === 'fixed') renderKakeibo();
-        if(viewName === 'memo') renderMemoList();
-        if(isDataLoaded) saveData();
+        ['memo','fixed','kakeibo','save'].forEach(v => { document.getElementById(`tab-${v}`).classList.remove('active'); document.getElementById(`view-${v}`).classList.remove('active'); });
+        document.getElementById(`tab-${viewName}`).classList.add('active'); document.getElementById(`view-${viewName}`).classList.add('active');
+        data.lastViewedTab = viewName; if(isDataLoaded) { if(viewName === 'kakeibo' || viewName === 'fixed') renderKakeibo(); if(viewName === 'memo') renderMemoList(); saveData(); }
     };
 
-    window.addNewMemo = () => {
-        const newId = Date.now().toString();
-        data.freeMemos.push({ id: newId, title: "新規メモ", body: "", isOpen: true });
-        saveData(); openMemoEditor(newId);
-    };
-
+    window.addNewMemo = () => { const newId = Date.now().toString(); data.freeMemos.push({ id: newId, title: "新規メモ", body: "", isOpen: true }); saveData(); openMemoEditor(newId); };
     window.renderMemoList = () => {
-        const container = document.getElementById('memo-list-container');
-        if(!container) return; container.innerHTML = '';
+        const container = document.getElementById('memo-list-container'); if(!container) return; container.innerHTML = '';
         data.freeMemos.forEach((memo) => {
-            if(memo.isOpen === undefined) memo.isOpen = true; 
             const div = document.createElement('div'); div.className = 'memo-card';
-            const header = document.createElement('div'); header.className = 'memo-card-header';
-            const titleSpan = document.createElement('span'); titleSpan.className = 'memo-card-title'; titleSpan.innerText = memo.title;
-            const btnGroup = document.createElement('div'); btnGroup.className = 'memo-ctrl-btns';
-            const editBtn = document.createElement('button'); editBtn.className = 'btn-edit-mode'; editBtn.innerText = '✐ 編集';
-            editBtn.onclick = (e) => { e.stopPropagation(); openMemoEditor(memo.id); };
-            const upBtn = document.createElement('button'); upBtn.className = 'btn-icon'; upBtn.innerText = '↑';
-            upBtn.onclick = (e) => { e.stopPropagation(); moveMemo(memo.id, 'up'); };
-            const toggleBtn = document.createElement('button'); toggleBtn.className = 'btn-toggle-memo'; toggleBtn.innerText = memo.isOpen ? '－' : '＋';
-            toggleBtn.onclick = (e) => { e.stopPropagation(); toggleMemo(memo.id); };
-            btnGroup.append(editBtn, upBtn, toggleBtn); header.append(titleSpan, btnGroup);
-            const body = document.createElement('div'); body.className = 'memo-card-body';
-            if(!memo.isOpen) body.classList.add('collapsed');
-            body.innerText = memo.body; div.append(header, body); container.appendChild(div);
+            div.innerHTML = `<div class="memo-card-header"><span class="memo-card-title">${memo.title}</span><div class="memo-ctrl-btns"><button class="btn-edit-mode" onclick="openMemoEditor('${memo.id}')">✐ 編集</button><button class="btn-icon" onclick="moveMemo('${memo.id}','up')">↑</button><button class="btn-toggle-memo" onclick="toggleMemo('${memo.id}')">${memo.isOpen ? '－' : '＋'}</button></div></div><div class="memo-card-body ${memo.isOpen ? '' : 'collapsed'}">${memo.body}</div>`;
+            container.appendChild(div);
         });
     };
-
-    window.moveMemo = (id, direction) => {
-        const index = data.freeMemos.findIndex(m => m.id === id);
-        if (index === -1) return;
-        if (direction === 'up' && index > 0) [data.freeMemos[index], data.freeMemos[index - 1]] = [data.freeMemos[index - 1], data.freeMemos[index]];
-        saveData(); renderMemoList();
-    };
-
-    window.toggleMemo = (id) => {
-        const memo = data.freeMemos.find(m => m.id === id);
-        if(memo) { memo.isOpen = !memo.isOpen; saveData(); renderMemoList(); }
-    };
-
-    window.openMemoEditor = (id) => {
-        editingMemoId = id; const memo = data.freeMemos.find(m => m.id === id); if(!memo) return;
-        document.getElementById('memo-list-view').style.display = 'none';
-        document.getElementById('memo-editor').classList.add('active');
-        document.getElementById('memo-edit-title').value = memo.title;
-        document.getElementById('memo-edit-body').value = memo.body;
-    };
-
-    window.closeMemoEditor = () => {
-        if(!editingMemoId) return; saveCurrentMemo(); editingMemoId = null;
-        document.getElementById('memo-editor').classList.remove('active');
-        document.getElementById('memo-list-view').style.display = 'block';
-        renderMemoList();
-    };
-
-    window.saveCurrentMemo = () => {
-        if(!editingMemoId) return; const memo = data.freeMemos.find(m => m.id === editingMemoId);
-        if(memo) { memo.title = document.getElementById('memo-edit-title').value; memo.body = document.getElementById('memo-edit-body').value; saveData(); }
-    };
-
-    window.deleteCurrentMemo = () => {
-        if(!confirm("このメモを削除しますか？")) return;
-        data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId);
-        saveData(); editingMemoId = null;
-        document.getElementById('memo-editor').classList.remove('active');
-        document.getElementById('memo-list-view').style.display = 'block';
-        renderMemoList();
-    };
+    window.moveMemo = (id, dir) => { const idx = data.freeMemos.findIndex(m => m.id === id); if (idx > 0) [data.freeMemos[idx], data.freeMemos[idx - 1]] = [data.freeMemos[idx - 1], data.freeMemos[idx]]; saveData(); renderMemoList(); };
+    window.toggleMemo = (id) => { const memo = data.freeMemos.find(m => m.id === id); if(memo) { memo.isOpen = !memo.isOpen; saveData(); renderMemoList(); } };
+    window.openMemoEditor = (id) => { editingMemoId = id; const memo = data.freeMemos.find(m => m.id === id); document.getElementById('memo-list-view').style.display = 'none'; document.getElementById('memo-editor').classList.add('active'); document.getElementById('memo-edit-title').value = memo.title; document.getElementById('memo-edit-body').value = memo.body; };
+    window.closeMemoEditor = () => { if(!editingMemoId) return; saveCurrentMemo(); editingMemoId = null; document.getElementById('memo-editor').classList.remove('active'); document.getElementById('memo-list-view').style.display = 'block'; renderMemoList(); };
+    window.saveCurrentMemo = () => { if(!editingMemoId) return; const memo = data.freeMemos.find(m => m.id === editingMemoId); if(memo) { memo.title = document.getElementById('memo-edit-title').value; memo.body = document.getElementById('memo-edit-body').value; saveData(); } };
+    window.deleteCurrentMemo = () => { if(confirm("削除しますか？")) { data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId); saveData(); editingMemoId = null; document.getElementById('memo-editor').classList.remove('active'); document.getElementById('memo-list-view').style.display = 'block'; renderMemoList(); } };
 
     function renderKakeibo() {
-        const yearSelect = document.getElementById('year-select'); if(!yearSelect) return; yearSelect.innerHTML = '';
+        const yearSelect = document.getElementById('year-select'); yearSelect.innerHTML = '';
         const sortedYears = Object.keys(data.years).sort();
-        if(sortedYears.length===0){ data.years["2025"]=createNewYearData(); data.currentYear="2025"; sortedYears.push("2025"); }
-        if(!data.years[data.currentYear]) data.currentYear=sortedYears[0];
         sortedYears.forEach(y=>{ const op=document.createElement('option'); op.value=y; op.innerText=y+"年"; if(y===data.currentYear)op.selected=true; yearSelect.appendChild(op); });
-        const yd = data.years[data.currentYear]; let activeMonth = yd.activeMonth || 1;
-        const cY=document.getElementById('content-annual-year'), bY=document.getElementById('btn-annual-year');
-        if(yd.isAnnualYearOpen!==false){ cY.classList.remove('hidden'); bY.innerText="－"; } else { cY.classList.add('hidden'); bY.innerText="＋"; }
-        const cM=document.getElementById('content-annual-month'), bM=document.getElementById('btn-annual-month');
-        if(yd.isAnnualMonthOpen!==false){ cM.classList.remove('hidden'); bM.innerText="－"; } else { cM.classList.add('hidden'); bM.innerText="＋"; }
+        const yd = data.years[data.currentYear];
+        document.getElementById('content-annual-year').className = yd.isAnnualYearOpen!==false ? '' : 'hidden'; document.getElementById('btn-annual-year').innerText = yd.isAnnualYearOpen!==false ? '－' : '＋';
+        document.getElementById('content-annual-month').className = yd.isAnnualMonthOpen!==false ? '' : 'hidden'; document.getElementById('btn-annual-month').innerText = yd.isAnnualMonthOpen!==false ? '－' : '＋';
         renderAnnualTable('annual-table-year', yd.annualYear, 'annualYear'); renderAnnualTable('annual-table-month', yd.annualMonth, 'annualMonth');
         const tabs=document.getElementById('month-tabs'); tabs.innerHTML='';
-        for(let i=1; i<=12; i++){ const d=document.createElement('div'); d.className=`month-btn ${activeMonth===i?'active':''}`; d.innerText=i+"月"; d.onclick=()=>{ yd.activeMonth = i; saveData(); renderKakeibo(); }; tabs.appendChild(d); }
-        document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`; renderMonthlyBlocks(yd, activeMonth);
+        for(let i=1; i<=12; i++){ const d=document.createElement('div'); d.className=`month-btn ${yd.activeMonth===i?'active':''}`; d.innerText=i+"月"; d.onclick=()=>{ yd.activeMonth = i; saveData(); renderKakeibo(); }; tabs.appendChild(d); }
+        document.getElementById('monthly-header-title').innerText = `${yd.activeMonth}月の収支`; renderMonthlyBlocks(yd, yd.activeMonth);
     }
 
     function renderAnnualTable(cid, list, key) {
-        const c=document.getElementById(cid); if(!c) return; c.innerHTML=''; const t=document.createElement('table');
-        t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-        const tb=document.createElement('tbody'); (list||[]).forEach((item,idx)=>{
-            const tr=document.createElement('tr'); const tdD=document.createElement('td'); 
-            if(key==='annualYear') tdD.append(createInp(item.date, v=>updAnn(key,idx,'date',v), 'date'));
-            else { const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center"; w.append(createInp(item.date, v=>updAnn(key,idx,'date',v), 'day'), createSuf("日")); tdD.append(w); }
-            const tdTx=document.createElement('td'); tdTx.append(createTxt(item.text, v=>updAnn(key,idx,'text',v)));
-            const tdC=document.createElement('td'); tdC.append(createMon(item.cost, v=>updAnn(key,idx,'cost',v)));
+        const c=document.getElementById(cid); c.innerHTML=''; const t=document.createElement('table'); t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+        const tb=document.createElement('tbody');
+        (list||[]).forEach((item,idx)=>{
+            const tr=document.createElement('tr'); const tdD=document.createElement('td'); if(key==='annualYear') tdD.appendChild(createInp(item.date, v=>updAnn(key,idx,'date',v), 'date')); else { const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center"; w.append(createInp(item.date, v=>updAnn(key,idx,'date',v), 'day'), createSuf("日")); tdD.appendChild(w); }
+            const tdTx=document.createElement('td'); tdTx.appendChild(createTxt(item.text, v=>updAnn(key,idx,'text',v))); const tdC=document.createElement('td'); tdC.appendChild(createMon(item.cost, v=>updAnn(key,idx,'cost',v)));
             const tdUp=document.createElement('td'); if(idx > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx},'up')">↑</button>`;
             const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
-            tr.append(tdD,tdTx,tdC,tdUp,tdDel); tb.appendChild(tr); 
-        }); t.appendChild(tb); c.appendChild(t);
+            tr.append(tdD,tdTx,tdC,tdUp,tdDel); tb.appendChild(tr); 
+        });
+        t.appendChild(tb); c.appendChild(t);
     }
 
     function renderMonthlyBlocks(yd, month) {
-        const c=document.getElementById('monthly-container'); if(!c) return; c.innerHTML='';
+        const c=document.getElementById('monthly-container'); c.innerHTML='';
         (yd.months[month]||[]).forEach((b,bi)=>{
-            const d=document.createElement('div'); d.className='category-block';
-            d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
+            const d=document.createElement('div'); d.className='category-block'; d.innerHTML=`<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="updBkTi(${bi},this.value,${month})"><div style="display:flex;align-items:center;"><button class="btn-red" onclick="delBk(${bi},${month})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${month})">${b.isOpen!==false?'－':'＋'}</button></div></div>`;
             const contentDiv = document.createElement('div'); if(b.isOpen===false) contentDiv.classList.add('hidden');
-            if(b.type==='standard') {
-                if(b.balance === undefined) b.balance = 0; if(b.deposit === undefined) b.deposit = 0;
-                const summaryDiv = document.createElement('div'); summaryDiv.className = 'summary-area';
-                const item1 = document.createElement('div'); item1.className = 'summary-item';
-                item1.append(createLabel('残高'), createMon(b.balance, v=>updBkVal(bi, 'balance', v, month), null, true));
-                const item2 = document.createElement('div'); item2.className = 'summary-item';
-                item2.append(createLabel('入れる額'), createMon(b.deposit, v=>updBkVal(bi, 'deposit', v, month), null, true));
-                summaryDiv.append(item1, item2); contentDiv.appendChild(summaryDiv);
-            }
+            if(b.type==='standard'){ const sum = document.createElement('div'); sum.className = 'summary-area'; sum.innerHTML = `<div class="summary-item"><div class="summary-label">残高</div></div><div class="summary-item"><div class="summary-label">入れる額</div></div>`; sum.firstChild.appendChild(createMon(b.balance, v=>updBkVal(bi,'balance',v,month),null,true)); sum.lastChild.appendChild(createMon(b.deposit, v=>updBkVal(bi,'deposit',v,month),null,true)); contentDiv.appendChild(sum); }
             const t=document.createElement('table'); const tb=document.createElement('tbody');
-            if(b.type==='standard') t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">予定額</th><th class="col-money">確定額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
-            else t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+            if(b.type==='standard') t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">予定額</th><th class="col-money">確定額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`; else t.innerHTML=`<thead><tr><th class="col-date">日付</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
             (b.items||[]).forEach((it,ii)=>{
-                const tr=document.createElement('tr'); const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center";
-                w.append(createInp(it.date, v=>updIt(bi,ii,'date',v,month), 'day'), createSuf("日")); tdD.appendChild(w);
-                const tdN=document.createElement('td'); tdN.append(createTxt(it.name, v=>updIt(bi,ii,'name',v,month))); tr.append(tdD, tdN);
-                if(b.type==='standard'){ tr.append(createMonTd(it.plan, v=>updIt(bi,ii,'plan',v,month), bi, month), createMonTd(it.act, v=>updIt(bi,ii,'act',v,month), bi, month)); }
-                else { tr.append(createMonTd(it.out, v=>updIt(bi,ii,'out',v,month), bi, month), createMonTd(it.in, v=>updIt(bi,ii,'in',v,month), bi, month)); }
-                const tdUp=document.createElement('td'); if(ii > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${month},'up')">↑</button>`;
-                const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${month})">×</button>`;
-                tr.append(tdUp, tdDel); tb.appendChild(tr); 
+                const tr=document.createElement('tr'); const tdD=document.createElement('td'); const w=document.createElement('div'); w.style.display="flex"; w.style.alignItems="center"; w.style.justifyContent="center"; w.append(createInp(it.date, v=>updIt(bi,ii,'date',v,month), 'day'), createSuf("日")); tdD.appendChild(w);
+                const tdN=document.createElement('td'); tdN.appendChild(createTxt(it.name, v=>updIt(bi,ii,'name',v,month))); tr.append(tdD, tdN);
+                if(b.type==='standard'){ tr.append(createMonTd(it.plan, v=>updIt(bi,ii,'plan',v,month), bi, month), createMonTd(it.act, v=>updIt(bi,ii,'act',v,month), bi, month)); } else { tr.append(createMonTd(it.out, v=>updIt(bi,ii,'out',v,month), bi, month), createMonTd(it.in, v=>updIt(bi,ii,'in',v,month), bi, month)); }
+                const tdUp=document.createElement('td'); if(ii > 0) tdUp.innerHTML=`<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${month},'up')">↑</button>`; const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${month})">×</button>`; tr.append(tdUp, tdDel); tb.appendChild(tr); 
             });
-            const trTotal = document.createElement('tr'); trTotal.className = 'total-row'; let s1=0, s2=0;
-            if(b.type==='standard'){ (b.items||[]).forEach(i=>{s1+=Number(i.plan);s2+=Number(i.act)}); trTotal.innerHTML=`<td class="total-label">合計</td><td></td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; }
-            else { (b.items||[]).forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)}); trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; }
-            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.append(t, createAddRowBtn(()=>addIt(bi, month))); d.appendChild(contentDiv); c.appendChild(d);
+            const trTotal = document.createElement('tr'); trTotal.className = 'total-row'; let s1=0, s2=0; if(b.type==='standard'){ (b.items||[]).forEach(i=>{s1+=Number(i.plan);s2+=Number(i.act)}); trTotal.innerHTML=`<td class="total-label">合計</td><td></td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; } else { (b.items||[]).forEach(i=>{s1+=Number(i.out);s2+=Number(i.in)}); trTotal.innerHTML=`<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">${formatNum(s1)}</div></td><td><div class="total-val-box" id="t2-${bi}">${formatNum(s2)}</div></td><td colspan="2"></td>`; }
+            tb.appendChild(trTotal); t.appendChild(tb); contentDiv.appendChild(t); const ab=document.createElement('button'); ab.className='add-row-btn'; ab.innerText='追加'; ab.onclick=()=>addIt(bi, month); contentDiv.appendChild(ab); d.appendChild(contentDiv); c.appendChild(d);
         });
     }
 
-    function createLabel(t){ const l=document.createElement('div'); l.className='summary-label'; l.innerText=t; return l; }
-    function createAddRowBtn(fn){ const b=document.createElement('button'); b.className='add-row-btn'; b.innerText='追加'; b.onclick=fn; return b; }
-    function createMonTd(val, cb, bi, m){ const td=document.createElement('td'); td.append(createMon(val, cb, ()=>updateTotalDisplay(bi,m))); return td; }
-    function updateTotalDisplay(bIdx, month){ const b=data.years[data.currentYear].months[month][bIdx]; let s1=0,s2=0; (b.items||[]).forEach(i=>{if(b.type==='standard'){s1+=Number(i.plan);s2+=Number(i.act)}else{s1+=Number(i.out);s2+=Number(i.in)}}); const el1=document.getElementById(`t1-${bIdx}`), el2=document.getElementById(`t2-${bIdx}`); if(el1)el1.innerText=formatNum(s1); if(el2)el2.innerText=formatNum(s2); }
-
-    function createInp(v,cb,type){ const i=document.createElement('input'); i.value=v||""; if(type==='date')i.onblur=function(){this.value=formatDateAnnual(this.value);cb(this.value)}; else {i.type="tel";i.setAttribute("maxlength","2");i.oninput=function(){let v=this.value.replace(/[^0-9]/g,'');if(Number(v)>31)v="31";this.value=v;};i.onblur=function(){cb(this.value);};} return i; }
-    function createTxt(v,cb){ const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.oninput=function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';}; t.onblur=function(){cb(this.value);}; setTimeout(()=>t.oninput(),0); return t; }
-    function createMon(v,cb,bCb,isBig){ const i=document.createElement('input'); i.type="tel"; i.className=isBig?"summary-input":"money-input"; i.value=v?Number(v).toLocaleString():""; i.onfocus=function(){this.value=this.value.replace(/,/g,'');this.select();}; i.oninput=function(){let r=this.value.replace(/[^0-9\-]/g,'');if(r.lastIndexOf('-')>0)r=r.replace(/-/g,'');if(this.value!==r)this.value=r;}; i.onblur=function(){let v=this.value.replace(/,/g,'').replace(/[^0-9\-]/g,'');let n=parseFloat(v);if(isNaN(n)||n===0){cb(0);this.value="";}else{let c=Math.max(-999999,Math.min(999999,n));cb(c);this.value=c.toLocaleString();}if(bCb)bCb();}; return i; }
+    function createMonTd(val, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(val, cb, ()=>updateTotalDisplay(bi,m))); return td; }
+    function updateTotalDisplay(bIdx, month) { const block = data.years[data.currentYear].months[month][bIdx]; let s1=0, s2=0; (block.items || []).forEach(i => { if(block.type === 'standard'){s1+=Number(i.plan);s2+=Number(i.act)} else {s1+=Number(i.out);s2+=Number(i.in)} }); const el1 = document.getElementById(`t1-${bIdx}`), el2 = document.getElementById(`t2-${bIdx}`); if(el1) el1.innerText = formatNum(s1); if(el2) el2.innerText = formatNum(s2); }
+    function createInp(val, cb, type) { const i=document.createElement('input'); i.value=val||""; if(type==='date') i.onblur=function(){this.value=formatDateAnnual(this.value); cb(this.value)}; else { i.type="tel"; i.setAttribute("maxlength","2"); i.oninput=function(){let v=this.value.replace(/[^0-9]/g,'');if(Number(v)>31)v="31";this.value=v;}; i.onblur=function(){ cb(this.value); }; } return i; }
+    function createTxt(v,cb){ const t=document.createElement('textarea'); t.className="kakeibo-text"; t.value=v||""; t.oninput=function(){ this.style.height='auto'; this.style.height=this.scrollHeight+'px'; }; t.onblur=function(){ cb(this.value); }; return t; }
+    function createMon(v, cb, bCb, isBig = false){ const i=document.createElement('input'); i.type="tel"; i.className = isBig ? "summary-input" : "money-input"; i.value = v ? Number(v).toLocaleString() : ""; i.onfocus=function(){this.value=this.value.replace(/,/g,'');this.select();}; i.oninput=function(){let r=this.value.replace(/[^0-9\-]/g,'');if(r.lastIndexOf('-')>0)r=r.replace(/-/g,'');this.value=r;}; i.onblur=function(){let val=parseFloat(this.value.replace(/,/g,''));if(isNaN(val)||val===0){cb(0);this.value="";}else{let n=Math.max(-999999,Math.min(999999,val));cb(n);this.value=n.toLocaleString();}if(bCb) bCb();}; return i; }
     function createSuf(t){const s=document.createElement('span');s.style.fontSize="0.8em";s.innerText=t;return s;}
-    function formatDateAnnual(v){const n=v.replace(/[^0-9]/g,'');if(n.length===4)return parseInt(n.slice(0,2))+"/"+parseInt(n.slice(2,4));if(n.length===3)return parseInt(n.slice(0,1))+"/"+parseInt(n.slice(1,3));return v;}
-    function formatNum(n){return n?Number(n).toLocaleString():"0";}
+    function formatDateAnnual(val) { const n=val.replace(/[^0-9]/g,''); if(n.length===4)return parseInt(n.slice(0,2))+"/"+parseInt(n.slice(2,4)); if(n.length===3)return parseInt(n.slice(0,1))+"/"+parseInt(n.slice(1,3)); return val; }
+    function formatNum(num) { return num ? Number(num).toLocaleString() : "0"; }
 
-    window.addAnnualItem=(k)=>{const key=k==='year'?'annualYear':'annualMonth';if(!data.years[data.currentYear][key])data.years[data.currentYear][key]=[];data.years[data.currentYear][key].push({date:"",text:"",cost:0});saveData(true);renderKakeibo();};
-    window.moveAnn=(k,idx,dir)=>{const list=data.years[data.currentYear][k];if(dir==='up'&&idx>0)[list[idx],list[idx-1]]=[list[idx-1],list[idx]];saveData(true);renderKakeibo();};
+    window.addAnnualItem=(k)=>{ const l=(k==='year'?'annualYear':'annualMonth'); data.years[data.currentYear][l].push({date:"",text:"",cost:0}); saveData(true); renderKakeibo(); };
+    window.moveAnn=(k,idx,dir)=>{ const list=data.years[data.currentYear][k]; if(dir==='up'&&idx>0)[list[idx],list[idx-1]]=[list[idx-1],list[idx]]; saveData(true); renderKakeibo(); };
     window.updAnn=(l,i,k,v)=>{data.years[data.currentYear][l][i][k]=v;saveData(true)};
     window.delAnn=(l,i)=>{data.years[data.currentYear][l].splice(i,1);saveData(true);renderKakeibo()};
-    window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);renderKakeibo();};
+    window.toggleAnnualSub=(t)=>{if(t==='year')data.years[data.currentYear].isAnnualYearOpen=!data.years[data.currentYear].isAnnualYearOpen;else data.years[data.currentYear].isAnnualMonthOpen=!data.years[data.currentYear].isAnnualMonthOpen;saveData(true);renderKakeibo()};
     window.togBk=(i,m)=>{data.years[data.currentYear].months[m][i].isOpen=!data.years[data.currentYear].months[m][i].isOpen;saveData();renderKakeibo()};
-    window.addCategoryBlock=(t)=>{const m=data.years[data.currentYear].activeMonth||1;data.years[data.currentYear].months[m].push({type:t,title:t==='standard'?'リスト1':'リスト2',isOpen:true,items:[],balance:0,deposit:0});saveData();renderKakeibo();};
+    window.addCategoryBlock=(t)=>{ const m=data.years[data.currentYear].activeMonth||1; data.years[data.currentYear].months[m].push({type:t,title:t==='standard'?'リスト1':'リスト2',isOpen:true,items:[],balance:0,deposit:0}); saveData(); renderKakeibo(); };
     window.delBk=(i,m)=>{if(confirm("削除？")){data.years[data.currentYear].months[m].splice(i,1);saveData();renderKakeibo()}};
     window.updBkTi=(i,v,m)=>{data.years[data.currentYear].months[m][i].title=v;saveData()};
     window.updBkVal=(i,k,v,m)=>{data.years[data.currentYear].months[m][i][k]=v;saveData()};
-    window.addIt=(i,m)=>{const b=data.years[data.currentYear].months[m][i];if(!b.items)b.items=[];b.items.push(b.type==='standard'?{date:"",name:"",plan:0,act:0}:{date:"",name:"",out:0,in:0});saveData();renderKakeibo();};
-    window.moveIt=(bi,ii,m,dir)=>{const list=data.years[data.currentYear].months[m][bi].items;if(dir==='up'&&ii>0)[list[ii],list[ii-1]]=[list[ii-1],list[ii]];saveData();renderKakeibo();};
+    window.addIt=(i,m)=>{ const b=data.years[data.currentYear].months[m][i]; if(!b.items)b.items=[]; b.items.push(b.type==='standard'?{date:"",name:"",plan:0,act:0}:{date:"",name:"",out:0,in:0}); saveData(); renderKakeibo(); };
+    window.moveIt=(bi,ii,m,dir)=>{ const list=data.years[data.currentYear].months[m][bi].items; if(dir==='up'&&ii>0)[list[ii],list[ii-1]]=[list[ii-1],list[ii]]; saveData(); renderKakeibo(); };
     window.updIt=(b,i,k,v,m)=>{data.years[data.currentYear].months[m][b].items[i][k]=v;saveData()};
     window.delIt=(b,i,m)=>{data.years[data.currentYear].months[m][b].items.splice(i,1);saveData();renderKakeibo()};
     window.changeYear=()=>{data.currentYear=document.getElementById('year-select').value;renderKakeibo()};
-    window.addNewYear=()=>{const n=prompt("西暦(2026等)");if(n&&!data.years[n]){data.years[n]=createNewYearData();data.currentYear=n;saveData();renderKakeibo();}else if(data.years[n])alert("存在します")};
+    window.addNewYear=()=>{const n=prompt("西暦(2026等)");if(n&&!data.years[n]){data.years[n]=createNewYearData();data.currentYear=n;saveData();renderKakeibo()}else if(data.years[n])alert("存在します")};
     window.deleteYear=()=>{if(Object.keys(data.years).length<=1){alert("削除不可");return}if(confirm("削除？")){delete data.years[data.currentYear];data.currentYear=Object.keys(data.years).sort()[0];saveData();renderKakeibo()}};
-    window.shareDataText=async()=>{const s=JSON.stringify(data);if(navigator.share){try{await navigator.share({title:'家計簿',text:s});return;}catch(e){}}window.location.href="mailto:?body="+encodeURIComponent(s);};
+    window.shareDataText=async()=>{const s=JSON.stringify(data);if(navigator.share){try{await navigator.share({title:'家計簿',text:s});return}catch(e){}}window.location.href="mailto:?body="+encodeURIComponent(s);};
     window.exportDataToClipboard=()=>{const b=document.getElementById('backup-box');b.value=JSON.stringify(data);b.select();document.execCommand('copy');alert("完了");};
-    window.importDataFromText=()=>{const s=document.getElementById('backup-box').value.trim();if(!s||!confirm("上書き？"))return;try{data=JSON.parse(s);saveData();isDataLoaded=true;switchView('kakeibo');alert("完了");}catch(e){alert("形式エラー");}};
+    window.importDataFromText=()=>{const s=document.getElementById('backup-box').value.trim();if(s&&confirm("上書き復元しますか？")){try{data=JSON.parse(s);saveData();isDataLoaded=true;switchView('kakeibo');alert("復元完了");}catch(e){alert("形式エラー")}}};
 </script>
 </body>
 </html>
