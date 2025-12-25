@@ -1,7 +1,7 @@
 import { loadPage } from '../loader.js';
 
 export function init() {
-    const tabs = ['memo', 'fixed', 'kakeibo', 'save'];
+    const tabs = ['memo', 'fixed', 'kakeibo', 'todo', 'save'];
     tabs.forEach(name => {
         const el = document.getElementById(`tab-${name}`);
         if (el) {

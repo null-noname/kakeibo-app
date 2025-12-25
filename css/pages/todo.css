@@ -1,0 +1,55 @@
+.todo-card {
+    background: #202020;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.todo-check {
+    width: 22px;
+    height: 22px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.todo-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.todo-title {
+    font-weight: bold;
+    color: #81c784;
+    font-size: 1.1em;
+}
+
+.todo-title.done {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.todo-body-preview {
+    font-size: 0.9em;
+    color: #aaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.todo-btns {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.todo-title-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    outline: none;
+}
