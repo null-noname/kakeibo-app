@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>家計簿</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<style>
+    /* ----------------------------------------------------
+        デザインスタイル (V8.09)
+       ---------------------------------------------------- */
+    body { 
+        font-family: sans-serif; margin: 0; padding: 0; 
+        background: #121212; color: #e0e0e0; 
+        padding-bottom: 50px; 
+        padding-top: calc(90px + env(safe-area-inset-top)); 
+        user-select: none; 
+    }
+
+    #login-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: #121212; z-index: 3000;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .login-box { text-align: center; }
+    .login-btn {
+        background: #fff; color: #000; border: none; padding: 12px 24px;
+        border-radius: 25px; font-weight: bold; font-size: 1.1em;
+        cursor: pointer; display: flex; align-items: center; gap: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .header-area {
+        position: fixed; top: 0; left: 0; width: 100%;
+        background: #1b5e20; z-index: 1000;
+        padding-top: env(safe-area-inset-top);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .app-title-bar {
+        height: 30px; display: flex; align-items: center; justify-content: center;
+        font-weight: bold; color: #81c784; font-size: 0.9em;
+    }
+    .top-tabs {
+        display: flex; width: 100%; height: 50px;
+        background: #1b5e20;
+    }
+    .tab-item {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        color: #a5d6a7; font-weight: bold; cursor: pointer;
+        border-bottom: 4px solid transparent;
+        transition: all 0.2s; font-size: 1.05em;
+    }
+    .tab-item.active {
+        color: #fff; border-bottom: 4px solid #fff;
+        background: rgba(255,255,255,0.1);
+    }
+
+    .container { padding: 10px; max-width: 600px; margin: 0 auto; }
+    .view-section { display: none; animation: fadeIn 0.2s ease; }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    table { 
+        width: 100%; 
+        border-collapse: separate; 
+        border-spacing: 0 4px; 
+        table-layout: fixed; 
+        font-size: 0.95em; 
+    }
+    th { color: #aaa; font-weight: normal; font-size: 0.85em; text-align: center; padding-bottom: 2px; }
+    td { vertical-align: top; padding: 0 1px; }
+
+    .col-date { width: 54px; }
+    .col-money { width: 70px; }
+    .col-btn { width: 28px; }
+    
+    input, textarea { 
+        box-sizing: border-box; border: 1px solid #444; 
+        background: #2a2a2a; border-radius: 3px; 
+        color: #fff; font-size: 1.1em; padding: 2px; 
+    }
+    
+    textarea.kakeibo-text { 
+        width: 100%; 
+        color: #eee; 
+        resize: none; 
+        line-height: 1.4em;
+        min-height: 2.2em;
+        white-space: pre-wrap; 
+        word-break: break-all;
+        overflow: hidden;
+        vertical-align: middle;
+        padding: 4px 2px;
+    }
+    
+    input { height: 2.2em; }
+    input.day-input { text-align: center; width: 100%; font-family: monospace; font-weight: bold; padding: 2px 0; }
+    input.date-input { text-align: center; width: 100%; font-family: monospace; font-weight: bold; padding: 0; }
+    input.money-input { 
+        text-align: right; color: #80d8ff; width: 100%; 
+        font-family: monospace; font-weight: bold; letter-spacing: -0.5px; 
+        padding-right: 2px; font-size: 1.0em; 
+    }
+    
+    .mini-btn {
+        width: 100%; height: 2.2em;
+        padding: 0; margin: 0;
+        border-radius: 3px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.0em; cursor: pointer;
+        border: 1px solid #555;
+    }
+    .btn-up { background: #333; color: #81c784; font-weight: bold; }
+    .btn-del { background: #333; color: #e57373; font-weight: bold; }
+
+    .memo-card {
+        background: #202020; border: 1px solid #333; border-radius: 8px;
+        padding: 12px 15px; margin-bottom: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        transition: all 0.2s ease;
+    }
+    .memo-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .memo-card-title { font-weight: bold; color: #81c784; font-size: 1.2em; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px; }
+    .memo-ctrl-btns { display: flex; gap: 5px; align-items: center; }
+    
+    .btn-edit-mode { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; padding: 0 12px; height: 32px; font-size: 0.9em; cursor: pointer; display: flex; align-items: center; }
+    .btn-icon { background: #333; color: #aaa; border: 1px solid #555; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; cursor: pointer; }
+    .btn-toggle-memo { background: #1b5e20; color: #fff; border: 1px solid #4caf50; border-radius: 4px; width: 32px; height: 32px; font-weight: bold; font-size: 1.2em; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+    .memo-card-body { font-family: 'Consolas', 'Monaco', monospace; color: #e0e0e0; font-size: 1.05em; line-height: 1.5; white-space: pre-wrap; word-break: break-all; border-top: 1px dashed #444; margin-top: 8px; padding-top: 8px; }
+    .memo-card-body.collapsed { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: #888; border-top: none; }
+
+    #memo-editor { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; z-index: 2000; padding-top: env(safe-area-inset-top); flex-direction: column; }
+    #memo-editor.active { display: flex; }
+    .editor-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #202020; border-bottom: 1px solid #333; }
+    input.memo-title-input { width: 100%; background: transparent; border: none; color: #fff; font-size: 1.2em; font-weight: bold; padding: 10px 15px; border-bottom: 1px solid #333; outline: none; }
+    textarea.memo-body { flex: 1; width: 100%; background: #272727; color: #f0f0f0; border: none; padding: 15px; font-size: 16px; line-height: 1.6; font-family: 'Consolas', 'Monaco', monospace; resize: none; outline: none; box-sizing: border-box; }
+
+    h2 { font-size: 1.2em; border-left: 6px solid #2e7d32; padding-left: 10px; margin: 20px 0 10px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .btn-green { background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; padding: 8px 14px; font-size: 1em; }
+    .btn-red { background: #c62828; color: #fff; border: 1px solid #e57373; border-radius: 4px; padding: 6px 12px; font-size: 0.9em; }
+    .btn-backup { background: #1565c0; color: #fff; border: 1px solid #42a5f5; border-radius: 4px; padding: 12px; font-size: 1.1em; width: 100%; margin-bottom: 15px; cursor: pointer; }
+    .btn-backup-sub { background: #424242; color: #ccc; border: 1px solid #666; border-radius: 4px; padding: 12px; font-size: 1.1em; width: 100%; margin-bottom: 15px; cursor: pointer; }
+    .btn-year-ctrl { padding: 6px 12px; font-size: 0.9em; border-radius: 4px; color: #fff; margin-left: 5px; cursor: pointer; }
+    .bg-green { background: #2e7d32; border: 1px solid #4caf50; }
+    .bg-red { background: #c62828; border: 1px solid #e57373; }
+    .btn-toggle { background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; width: 34px; height: 34px; font-weight: bold; font-size: 1.2em; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; }
+    .add-row-btn { width: 100%; padding: 10px; margin-top: 5px; background: #2e7d32; color: #fff; border: 1px solid #4caf50; border-radius: 4px; font-size: 1.1em; cursor: pointer; }
+    
+    input.summary-input { text-align: right; color: #80d8ff; width: 120px; height: 2.5em; font-family: monospace; font-weight: bold; letter-spacing: -0.5px; padding-right: 6px; font-size: 1.3em; background: #333; border: 1px solid #555; border-radius: 4px; }
+    
+    #annual-section { background: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333; }
+    .annual-group { margin-bottom: 30px; } 
+    .annual-header { font-weight: bold; color: #fff; border-bottom: 2px solid #2e7d32; margin-bottom: 10px; padding-bottom: 2px; font-size: 1.2em; display: flex; justify-content: space-between; align-items: center; }
+    .year-controls { background: #1f1f1f; padding: 10px; margin: 15px 0; border-radius: 5px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    select { font-size: 1.2em; padding: 5px; background: #333; color: #fff; border: 1px solid #555; }
+    .month-selector { display: flex; overflow-x: auto; background: #000; margin-bottom: 15px; border: 1px solid #333; padding: 5px 0; }
+    .month-btn { flex: 0 0 auto; padding: 12px 18px; color: #888; border-right: 1px solid #222; cursor: pointer; }
+    .month-btn.active { background: #2e7d32; color: #fff; font-weight: bold; border: 1px solid #fff; border-radius: 2px; }
+    .category-block { background: #1e1e1e; padding: 10px; margin-bottom: 25px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); border: 1px solid #333; }
+    .cat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: #2c2c2c; padding: 8px; border-radius: 3px; border: 1px solid #444; }
+    .cat-title-input { font-weight: bold; border: none !important; background: transparent !important; font-size: 1.4em; width: 60%; color: #fff; padding: 0; }
+    .summary-area { display: flex; align-items: center; justify-content: space-around; background: #252525; padding: 10px 5px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #383838; }
+    .summary-item { display: flex; align-items: center; }
+    .summary-label { font-size: 1.1em; color: #ccc; margin-right: 10px; white-space: nowrap; }
+    
+    .add-block-area { text-align: center; margin-top: 30px; border-top: 1px dashed #444; padding-top: 20px; }
+    .big-btn { background: #2e7d32; color: #fff; padding: 14px 24px; border: 1px solid #4caf50; border-radius: 5px; font-size: 1.1em; margin: 5px; width: 85%; cursor: pointer; }
+    .hidden { display: none !important; }
+    .total-row td { vertical-align: middle; }
+    .total-val-box { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; text-align: right; color: #fff; font-weight: bold; font-family: monospace; font-size: 1.05em; padding: 4px; height: 2.0em; display: flex; align-items: center; justify-content: flex-end; letter-spacing: -0.5px; }
+    .total-label { text-align: center; font-weight: bold; color: #fff; background: transparent; border: none; font-size: 1.1em; }
+
+    #sync-status { position:fixed; bottom:10px; right:10px; font-size:0.8em; color:#aaa; background:#222; padding:4px 8px; border-radius:4px; opacity:0.7; z-index:9999; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1 style="color:#81c784; margin-bottom:30px;">家計簿</h1>
+        <button class="login-btn" onclick="loginWithGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            Googleでログイン
+        </button>
+    </div>
+</div>
+
+<div id="main-app" style="display:none;">
+    <div class="header-area">
+        <div class="app-title-bar">家計簿</div>
+        <div class="top-tabs">
+            <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
+            <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
+            <div class="tab-item active" onclick="switchView('kakeibo')" id="tab-kakeibo">💰 収支</div>
+            <div class="tab-item" onclick="switchView('save')" id="tab-save">💾 保存</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="view-memo" class="view-section">
+            <div id="memo-list-view">
+                <button class="add-row-btn" onclick="addNewMemo()">＋ 新しいメモを追加</button>
+                <div id="memo-list-container" style="margin-top:15px;"></div>
+            </div>
+            <div id="memo-editor">
+                <div class="editor-toolbar">
+                    <button class="btn-green" onclick="closeMemoEditor()">＜ 戻る</button>
+                    <button class="btn-red" onclick="deleteCurrentMemo()">削除</button>
+                </div>
+                <input type="text" id="memo-edit-title" class="memo-title-input" placeholder="タイトル" onblur="saveCurrentMemo()">
+                <textarea id="memo-edit-body" class="memo-body" placeholder="内容を入力..." onblur="saveCurrentMemo()"></textarea>
+            </div>
+        </div>
+
+        <div id="view-fixed" class="view-section">
+            <h2>固定費</h2>
+            <div id="annual-section">
+                <div class="annual-group">
+                    <div class="annual-header">
+                        <span>年間</span>
+                        <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+                    </div>
+                    <div id="content-annual-year">
+                        <div id="annual-table-year"></div>
+                        <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
+                    </div>
+                </div>
+                <div class="annual-group">
+                    <div class="annual-header">
+                        <span>月間</span>
+                        <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
+                    </div>
+                    <div id="content-annual-month">
+                        <div id="annual-table-month"></div>
+                        <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-kakeibo" class="view-section active">
+            <div class="year-controls">
+                <select id="year-select" onchange="changeYear()"></select>
+                <div>
+                    <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
+                    <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
+                </div>
+            </div>
+            <div class="month-selector" id="month-tabs"></div>
+            <h2 id="monthly-header-title">1月の収支</h2> 
+            <div id="monthly-container"></div>
+            <div class="add-block-area">
+                <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
+                <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
+            </div>
+        </div>
+
+        <div id="view-save" class="view-section">
+            <div class="settings-menu">
+                <h2 style="border:none; justify-content:center;">データ管理</h2>
+                <button class="btn-backup" onclick="shareDataText()">📤 データを書き出し (共有)</button>
+                <button class="btn-backup" style="background:#00695c; border-color:#00897b;" onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
+                <hr style="border:0; border-top:1px solid #444; margin:20px 0;">
+                <textarea id="backup-box" style="width:100%; height:100px; background:#2a2a2a; color:#fff;" placeholder="ここにデータを貼り付けて復元"></textarea>
+                <button class="btn-backup-sub" onclick="importDataFromText()">📂 データを復元 (読み込み)</button>
+                <button onclick="logout()" style="width:100%; margin-top:30px; background:#444; color:#ccc; border:none; padding:10px; cursor:pointer; border-radius:4px;">ログアウト</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="sync-status">同期待機中...</div>
+
+<script>
+    // kakeibo_V8.11 (Fix Render Error & Smart Date Shorthand)
+    
+    // --- Service Worker Cleanup ---
+    if (window.navigator && navigator.serviceWorker) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) { registration.unregister(); }
+        });
+    }
+
+    // --- Firebase設定 ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyCT_VvEPzGCPRLLFnzQuwArsYn2JnUR_fg",
+        authDomain: "kakeibo-app-92bb4.firebaseapp.com",
+        databaseURL: "https://kakeibo-app-92bb4-default-rtdb.firebaseio.com",
+        projectId: "kakeibo-app-92bb4",
+        storageBucket: "kakeibo-app-92bb4.firebasestorage.app",
+        messagingSenderId: "45651637804",
+        appId: "1:45651637804:web:f30ba95891d28538a14389"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+    let dbRef = null;
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+    const initialData = {
+        currentYear: "2025",
+        lastViewedTab: "kakeibo",
+        years: { "2025": createNewYearData() },
+        freeMemos: [] 
+    };
+
+    let data = JSON.parse(JSON.stringify(initialData));
+    let isDataLoaded = false;
+    let editingMemoId = null;
+
+    // --- ログイン処理ロジック ---
+    auth.getRedirectResult().then((result) => {
+        if (result && result.user) {
+            console.log("Redirect Login Success");
+        }
+    }).catch((error) => {
+        console.error("Redirect Login Error:", error);
+    });
+
+    auth.onAuthStateChanged((user) => {
+        const loginScr = document.getElementById('login-screen');
+        const mainApp = document.getElementById('main-app');
+        const statusEl = document.getElementById('sync-status');
+        
+        if (user) {
+            loginScr.style.display = 'none';
+            mainApp.style.display = 'block';
+            dbRef = db.ref('kakeiboData');
+            initApp();
+        } else {
+            loginScr.style.display = 'flex';
+            mainApp.style.display = 'none';
+            statusEl.innerText = "ログイン待機中";
+        }
+    });
+
+    async function loginWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        try {
+            await auth.signInWithPopup(provider);
+        } catch (error) {
+            console.error("Auth Error:", error.code);
+            if (error.code === 'auth/popup-blocked') {
+                alert("ポップアップがブロックされました。ブラウザの設定で許可してください。");
+            }
+        }
+    }
+
+    function logout() {
+        if(confirm("ログアウトしますか？")) {
+            auth.signOut().then(() => { location.reload(); });
+        }
+    }
+
+    function initApp() {
+        if(!dbRef) return;
+        dbRef.on('value', (snapshot) => {
+            const val = snapshot.val();
+            const statusEl = document.getElementById('sync-status');
+            if (val) {
+                data = val; 
+                if(!data.years) data = JSON.parse(JSON.stringify(initialData));
+                if(!data.freeMemos) data.freeMemos = [];
+            } else {
+                const local = localStorage.getItem('kakeiboDataV7_Backup');
+                if(local) {
+                    data = JSON.parse(local);
+                    if(!data.freeMemos) data.freeMemos = [];
+                    saveData(false);
+                } else {
+                    data = JSON.parse(JSON.stringify(initialData));
+                }
+            }
+            isDataLoaded = true;
+            switchView(data.lastViewedTab || 'kakeibo');
+            if(!document.getElementById('memo-editor').classList.contains('active')) renderMemoList(); 
+            if(statusEl) { statusEl.innerText = "● 同期完了"; setTimeout(() => { statusEl.innerText = ""; }, 2000); }
+        });
+    }
+
+    function saveData(syncAnnual = false) {
+        if(!isDataLoaded || !dbRef) return;
+        if(syncAnnual) {
+            const currentY = data.years[data.currentYear];
+            Object.keys(data.years).forEach(y => {
+                if(y !== data.currentYear && data.years[y]) {
+                    data.years[y].annualYear = JSON.parse(JSON.stringify(currentY.annualYear));
+                    data.years[y].annualMonth = JSON.parse(JSON.stringify(currentY.annualMonth));
+                }
+            });
+        }
+        dbRef.set(data);
+        localStorage.setItem('kakeiboDataV7_Backup', JSON.stringify(data));
+        const el = document.getElementById('sync-status');
+        if(el) el.innerText = "↑ 送信中...";
+    }
+
+    function createNewYearData() {
+        let months = {};
+        for(let i=1; i<=12; i++){
+            months[i] = [
+                { type: "standard", title: "通帳", isOpen: true, items: [], balance: 0, deposit: 0 },
+                { type: "standard", title: "財布", isOpen: true, items: [], balance: 0, deposit: 0 },
+                { type: "detail", title: "競馬", isOpen: true, items: [] }
+            ];
+        }
+        return { annualYear: [], annualMonth: [], isAnnualYearOpen: true, isAnnualMonthOpen: true, activeMonth: 1, months: months };
+    }
+
+    window.switchView = (viewName) => {
+        if(viewName !== 'memo') closeMemoEditor();
+        ['memo','fixed','kakeibo','save'].forEach(v => {
+            const tab = document.getElementById(`tab-${v}`);
+            const sec = document.getElementById(`view-${v}`);
+            if(tab) tab.classList.remove('active');
+            if(sec) sec.classList.remove('active');
+        });
+        const activeTab = document.getElementById(`tab-${viewName}`);
+        const activeSec = document.getElementById(`view-${viewName}`);
+        if(activeTab) activeTab.classList.add('active');
+        if(activeSec) activeSec.classList.add('active');
+        data.lastViewedTab = viewName; 
+        if(viewName === 'kakeibo' || viewName === 'fixed') renderKakeibo();
+        if(viewName === 'memo') renderMemoList();
+        if(isDataLoaded) saveData();
+    };
+
+    // メモ帳ロジック
+    window.addNewMemo = () => {
+        const newId = Date.now().toString();
+        data.freeMemos.push({ id: newId, title: "新規メモ", body: "", isOpen: true });
+        saveData(); openMemoEditor(newId);
+    };
+    window.renderMemoList = () => {
+        const container = document.getElementById('memo-list-container');
+        if(!container) return;
+        container.innerHTML = '';
+        data.freeMemos.forEach((memo) => {
+            const div = document.createElement('div'); div.className = 'memo-card';
+            div.innerHTML = `<div class="memo-card-header"><span class="memo-card-title">${memo.title}</span><div class="memo-ctrl-btns">
+                <button class="btn-edit-mode" onclick="openMemoEditor('${memo.id}')">✐ 編集</button>
+                <button class="btn-icon" onclick="moveMemo('${memo.id}','up')">↑</button>
+                <button class="btn-toggle-memo" onclick="toggleMemo('${memo.id}')">${memo.isOpen ? '－' : '＋'}</button>
+            </div></div><div class="memo-card-body ${memo.isOpen ? '' : 'collapsed'}">${memo.body}</div>`;
+            container.appendChild(div);
+        });
+    };
+    window.moveMemo = (id, dir) => {
+        const i = data.freeMemos.findIndex(m => m.id === id);
+        if (dir === 'up' && i > 0) [data.freeMemos[i], data.freeMemos[i-1]] = [data.freeMemos[i-1], data.freeMemos[i]];
+        saveData(); renderMemoList();
+    };
+    window.toggleMemo = (id) => {
+        const m = data.freeMemos.find(m => m.id === id);
+        if(m) { m.isOpen = !m.isOpen; saveData(); renderMemoList(); }
+    };
+    window.openMemoEditor = (id) => {
+        editingMemoId = id; const m = data.freeMemos.find(m => m.id === id); if(!m) return;
+        document.getElementById('memo-list-view').style.display = 'none';
+        document.getElementById('memo-editor').classList.add('active');
+        document.getElementById('memo-edit-title').value = m.title;
+        document.getElementById('memo-edit-body').value = m.body;
+    };
+    window.closeMemoEditor = () => {
+        saveCurrentMemo(); editingMemoId = null;
+        document.getElementById('memo-editor').classList.remove('active');
+        document.getElementById('memo-list-view').style.display = 'block';
+        renderMemoList();
+    };
+    window.saveCurrentMemo = () => {
+        if(!editingMemoId) return; const m = data.freeMemos.find(m => m.id === editingMemoId);
+        if(m) { m.title = document.getElementById('memo-edit-title').value; m.body = document.getElementById('memo-edit-body').value; saveData(); }
+    };
+    window.deleteCurrentMemo = () => {
+        if(confirm("削除？")) { data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId); saveData(); closeMemoEditor(); }
+    };
+
+    // 家計簿描画ロジック
+    function renderKakeibo() {
+        const yearSelect = document.getElementById('year-select');
+        yearSelect.innerHTML = '';
+        Object.keys(data.years).sort().forEach(y => {
+            const op = document.createElement('option'); op.value = y; op.innerText = y + "年";
+            if(y === data.currentYear) op.selected = true; yearSelect.appendChild(op);
+        });
+        const yd = data.years[data.currentYear];
+        const activeMonth = yd.activeMonth || 1;
+        document.getElementById('btn-annual-year').innerText = yd.isAnnualYearOpen ? '－' : '＋';
+        document.getElementById('content-annual-year').className = yd.isAnnualYearOpen ? '' : 'hidden';
+        document.getElementById('btn-annual-month').innerText = yd.isAnnualMonthOpen ? '－' : '＋';
+        document.getElementById('content-annual-month').className = yd.isAnnualMonthOpen ? '' : 'hidden';
+        renderAnnualTable('annual-table-year', yd.annualYear, 'annualYear');
+        renderAnnualTable('annual-table-month', yd.annualMonth, 'annualMonth');
+        const tabs = document.getElementById('month-tabs'); tabs.innerHTML = '';
+        for(let i=1; i<=12; i++) {
+            const d = document.createElement('div'); d.className = `month-btn ${activeMonth === i ? 'active' : ''}`;
+            d.innerText = i + "月"; d.onclick = () => { yd.activeMonth = i; saveData(); renderKakeibo(); }; tabs.appendChild(d);
+        }
+        document.getElementById('monthly-header-title').innerText = `${activeMonth}月の収支`;
+        renderMonthlyBlocks(yd, activeMonth);
+    }
+
+    function renderAnnualTable(cid, list, key) {
+        const c = document.getElementById(cid); c.innerHTML = '';
+        const t = document.createElement('table');
+        t.innerHTML = `<thead><tr><th class="col-date">日付</th><th>内容</th><th class="col-money">金額</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+        const tb = document.createElement('tbody');
+        (list || []).forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            const tdD = document.createElement('td'); tdD.appendChild(createInp(item.date, v => { data.years[data.currentYear][key][idx].date = v; saveData(true); }, key === 'annualYear' ? 'date' : 'day'));
+            const tdT = document.createElement('td'); tdT.appendChild(createTxt(item.text, v => { data.years[data.currentYear][key][idx].text = v; saveData(true); }));
+            const tdC = document.createElement('td'); tdC.appendChild(createMon(item.cost, v => { data.years[data.currentYear][key][idx].cost = v; saveData(true); }));
+            const tdU = document.createElement('td'); tdU.innerHTML = idx > 0 ? `<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx})">↑</button>` : '';
+            const tdDk = document.createElement('td'); tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
+            tr.append(tdD, tdT, tdC, tdU, tdDk); tb.appendChild(tr);
+        });
+        t.appendChild(tb); c.appendChild(t);
+    }
+
+    function renderMonthlyBlocks(yd, m) {
+        const c = document.getElementById('monthly-container'); c.innerHTML = '';
+        (yd.months[m] || []).forEach((b, bi) => {
+            const d = document.createElement('div'); d.className = 'category-block';
+            d.innerHTML = `<div class="cat-header"><input type="text" class="cat-title-input" value="${b.title}" onchange="data.years[data.currentYear].months[${m}][${bi}].title=this.value;saveData()"><div style="display:flex;gap:5px;"><button class="btn-red" onclick="delBk(${bi},${m})">削除</button><button class="btn-toggle" onclick="togBk(${bi},${m})">${b.isOpen ? '－' : '＋'}</button></div></div>`;
+            if(b.isOpen) {
+                const inner = document.createElement('div');
+                if(b.type === 'standard') {
+                    inner.innerHTML = `<div class="summary-area"><div class="summary-item"><span class="summary-label">残高</span><div id="bal-${bi}"></div></div><div class="summary-item"><span class="summary-label">入れる額</span><div id="dep-${bi}"></div></div></div>`;
+                    const balBox = inner.querySelector(`#bal-${bi}`);
+                    const depBox = inner.querySelector(`#dep-${bi}`);
+                    balBox.appendChild(createMon(b.balance, v => { data.years[data.currentYear].months[m][bi].balance = v; saveData(); }, null, true));
+                    depBox.appendChild(createMon(b.deposit, v => { data.years[data.currentYear].months[m][bi].deposit = v; saveData(); }, null, true));
+                }
+                const t = document.createElement('table');
+                t.innerHTML = b.type === 'standard' ? `<thead><tr><th class="col-date">日</th><th>内容</th><th class="col-money">予定</th><th class="col-money">確定</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>` : `<thead><tr><th class="col-date">日</th><th>重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btn"></th><th class="col-btn"></th></tr></thead>`;
+                const tb = document.createElement('tbody');
+                (b.items || []).forEach((it, ii) => {
+                    const tr = document.createElement('tr');
+                    const tdD = document.createElement('td'); tdD.appendChild(createInp(it.date, v => { data.years[data.currentYear].months[m][bi].items[ii].date = v; saveData(); }, 'day'));
+                    const tdN = document.createElement('td'); tdN.appendChild(createTxt(it.name, v => { data.years[data.currentYear].months[m][bi].items[ii].name = v; saveData(); }));
+                    tr.append(tdD, tdN);
+                    if(b.type === 'standard') {
+                        tr.appendChild(createMonTd(it.plan, v => { data.years[data.currentYear].months[m][bi].items[ii].plan = v; saveData(); }, bi, m));
+                        tr.appendChild(createMonTd(it.act, v => { data.years[data.currentYear].months[m][bi].items[ii].act = v; saveData(); }, bi, m));
+                    } else {
+                        tr.appendChild(createMonTd(it.out, v => { data.years[data.currentYear].months[m][bi].items[ii].out = v; saveData(); }, bi, m));
+                        tr.appendChild(createMonTd(it.in, v => { data.years[data.currentYear].months[m][bi].items[ii].in = v; saveData(); }, bi, m));
+                    }
+                    const tdU = document.createElement('td'); tdU.innerHTML = ii > 0 ? `<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${m},'up')">↑</button>` : '';
+                    const tdDk = document.createElement('td'); tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${m})">×</button>`;
+                    tr.append(tdU, tdDk); tb.appendChild(tr);
+                });
+                const totalTr = document.createElement('tr'); totalTr.className = 'total-row';
+                totalTr.innerHTML = `<td></td><td class="total-label">合計</td><td><div class="total-val-box" id="t1-${bi}">0</div></td><td><div class="total-val-box" id="t2-${bi}">0</div></td><td colspan="2"></td>`;
+                tb.appendChild(totalTr); t.appendChild(tb); inner.appendChild(t); inner.appendChild(createAddRowBtn(() => addIt(bi, m))); d.appendChild(inner);
+                setTimeout(() => updateTotalDisplay(bi, m), 0);
+            }
+            c.appendChild(d);
+        });
+    }
+
+    // パーツ生成ヘルパー群
+    function createMonTd(v, cb, bi, m) { const td = document.createElement('td'); td.appendChild(createMon(v, cb, () => updateTotalDisplay(bi, m))); return td; }
+    function updateTotalDisplay(bi, m) {
+        const b = data.years[data.currentYear].months[m][bi]; let s1 = 0, s2 = 0;
+        (b.items || []).forEach(it => { if(b.type === 'standard') { s1 += Number(it.plan || 0); s2 += Number(it.act || 0); } else { s1 += Number(it.out || 0); s2 += Number(it.in || 0); } });
+        const e1 = document.getElementById(`t1-${bi}`), e2 = document.getElementById(`t2-${bi}`);
+        if(e1) e1.innerText = formatNum(s1); if(e2) e2.innerText = formatNum(s2);
+    }
+    function createInp(v, cb, type) {
+        const i = document.createElement('input'); i.value = v || "";
+        if(type === 'date') { i.className = "date-input"; i.onblur = function() { this.value = formatDateAnnual(this.value); cb(this.value); }; }
+        else { i.type = "tel"; i.className = "day-input"; i.oninput = function() { this.value = this.value.replace(/[^0-9]/g, '').slice(0, 2); }; i.onblur = function() { cb(this.value); }; }
+        return i;
+    }
+    function createTxt(v, cb) {
+        const t = document.createElement('textarea'); t.className = "kakeibo-text"; t.value = v || ""; t.rows = 1;
+        t.oninput = function() { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; };
+        t.onblur = function() { cb(this.value); }; setTimeout(() => t.oninput(), 0); return t;
+    }
+    function createMon(v, cb, bCb, isBig) {
+        const i = document.createElement('input'); i.type = "tel"; i.className = isBig ? "summary-input" : "money-input";
+        i.value = (v === 0 || v === "0") ? "" : Number(v).toLocaleString();
+        i.onfocus = function() { this.value = this.value.replace(/,/g, ''); this.select(); };
+        i.onblur = function() { 
+            let n = parseInt(this.value.replace(/[^0-9\-]/g, '')) || 0; 
+            cb(n); this.value = n ? n.toLocaleString() : ""; if(bCb) bCb(); 
+        }; return i;
+    }
+    function createAddRowBtn(fn) { const b = document.createElement('button'); b.className = 'add-row-btn'; b.innerText = '追加'; b.onclick = fn; return b; }
+    
+    // スマート日付短縮入力 (V8.11 修正)
+    function formatDateAnnual(v) {
+        const nums = v.replace(/[^0-9]/g, '');
+        // 4桁: MMDD (例: 1201 -> 12/1)
+        if (nums.length === 4) return parseInt(nums.slice(0,2)) + "/" + parseInt(nums.slice(2,4));
+        // 3桁: MDD または MMD (例: 201 -> 2/1, 101 -> 10/1)
+        if (nums.length === 3) {
+            let m12 = parseInt(nums.slice(0, 2));
+            if (m12 >= 10 && m12 <= 12) {
+                // 10月〜12月優先 (101 -> 10/1)
+                return m12 + "/" + parseInt(nums.slice(2, 3));
+            } else {
+                // MDD形式 (201 -> 2/1)
+                return parseInt(nums.slice(0, 1)) + "/" + parseInt(nums.slice(1, 3));
+            }
+        }
+        return v;
+    }
+    
+    function formatNum(n) { return Number(n).toLocaleString(); }
+
+    // 操作関数
+    window.addAnnualItem = (k) => { const key = k === 'year' ? 'annualYear' : 'annualMonth'; data.years[data.currentYear][key].push({date:"",text:"",cost:0}); saveData(true); renderKakeibo(); };
+    window.moveAnn = (k, idx) => { const l = data.years[data.currentYear][k]; if(idx > 0) [l[idx], l[idx-1]] = [l[idx-1], l[idx]]; saveData(true); renderKakeibo(); };
+    window.delAnn = (k, idx) => { if(confirm("削除？")) { data.years[data.currentYear][k].splice(idx, 1); saveData(true); renderKakeibo(); } };
+    window.toggleAnnualSub = (t) => { if(t === 'year') data.years[data.currentYear].isAnnualYearOpen = !data.years[data.currentYear].isAnnualYearOpen; else data.years[data.currentYear].isAnnualMonthOpen = !data.years[data.currentYear].isAnnualMonthOpen; saveData(); renderKakeibo(); };
+    window.togBk = (bi, m) => { data.years[data.currentYear].months[m][bi].isOpen = !data.years[data.currentYear].months[m][bi].isOpen; saveData(); renderKakeibo(); };
+    window.addCategoryBlock = (t) => { const m = yd.activeMonth; data.years[data.currentYear].months[m].push({type:t, title:t === 'standard' ? 'リスト1' : 'リスト2', isOpen:true, items:[], balance:0, deposit:0}); saveData(); renderKakeibo(); };
+    window.delBk = (bi, m) => { if(confirm("削除？")) { data.years[data.currentYear].months[m].splice(bi, 1); saveData(); renderKakeibo(); } };
+    window.addIt = (bi, m) => { const b = data.years[data.currentYear].months[m][bi]; b.items.push(b.type === 'standard' ? {date:"",name:"",plan:0,act:0} : {date:"",name:"",out:0,in:0}); saveData(); renderKakeibo(); };
+    window.moveIt = (bi, ii, m, dir) => { const l = data.years[data.currentYear].months[m][bi].items; if(dir === 'up' && ii > 0) [l[ii], l[ii-1]] = [l[ii-1], l[ii]]; saveData(); renderKakeibo(); };
+    window.delIt = (bi, ii, m) => { if(confirm("削除？")) { data.years[data.currentYear].months[m][bi].items.splice(ii, 1); saveData(); renderKakeibo(); } };
+    window.changeYear = () => { data.currentYear = document.getElementById('year-select').value; renderKakeibo(); };
+    window.addNewYear = () => { let n = prompt("西暦を入力"); if(n && !data.years[n]) { data.years[n] = createNewYearData(); data.currentYear = n; saveData(); renderKakeibo(); } };
+    window.deleteYear = () => { if(Object.keys(data.years).length > 1 && confirm("削除？")) { delete data.years[data.currentYear]; data.currentYear = Object.keys(data.years)[0]; saveData(); renderKakeibo(); } };
+    
+    window.shareDataText = async () => { const s = JSON.stringify(data); if(navigator.share) await navigator.share({title:'家計簿', text:s}); else alert(s); };
+    window.exportDataToClipboard = () => { navigator.clipboard.writeText(JSON.stringify(data)); alert("コピー完了"); };
+    window.importDataFromText = () => { try { const s = document.getElementById('backup-box').value; if(s) { data = JSON.parse(s); saveData(); location.reload(); } } catch(e) { alert("エラー"); } };
+
+    document.getElementById('sync-status').innerText = "接続中...";
+</script>
+</body>
+</html>

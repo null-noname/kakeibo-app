@@ -1,0 +1,15 @@
+export async function loadPage(name, targetId = 'app') {
+    const target = document.getElementById(targetId);
+    const res = await fetch(`./components/${name}.html`);
+    target.innerHTML = await res.text();
+
+    document.querySelectorAll(`.${targetId}-style`).forEach(e => e.remove());
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.className = `${targetId}-style`;
+    link.href = `./css/pages/${name}.css`;
+    document.head.appendChild(link);
+
+    const mod = await import(`./pages/${name}.js`);
+    if (mod.init) mod.init();
+}

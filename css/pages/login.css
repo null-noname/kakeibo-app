@@ -1,0 +1,17 @@
+body { 
+    font-family: sans-serif; margin: 0; background: #121212; 
+    color: #e0e0e0; user-select: none; 
+}
+#login-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #121212; z-index: 3000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.login-box { text-align: center; }
+.login-box h1 { color: #81c784; margin-bottom: 30px; }
+.login-btn {
+    background: #fff; color: #000; border: none; padding: 12px 24px;
+    border-radius: 25px; font-weight: bold; font-size: 1.1em;
+    cursor: pointer; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
