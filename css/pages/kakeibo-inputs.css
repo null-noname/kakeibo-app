@@ -18,6 +18,19 @@ textarea.kakeibo-text {
     width: 100%;
     color: #eee;
     resize: none;
-    line-height: 1.4em;
+    line-height: 1.2em;
     padding: 4px 2px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    min-height: 1.2em;
+}
+
+.no-border-block input,
+.no-border-block textarea {
+    border: none !important;
+    background: transparent !important;
+}
+
+.btn-del {
+    color: #f44336 !important;
 }

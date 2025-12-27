@@ -5,5 +5,5 @@ export function getRowHtml(it) {
         <td><textarea class="kakeibo-text">${it.name || ''}</textarea></td>
         <td><input class="money-input" value="${Number(v1).toLocaleString()}" type="tel"></td>
         <td><input class="money-input" value="${Number(v2).toLocaleString()}" type="tel"></td>
-        <td><button class="mini-btn">↑</button></td><td><button class="mini-btn">×</button></td>`;
+        <td><button class="mini-btn">▲</button></td><td><button class="mini-btn btn-del">×</button></td>`;
 }

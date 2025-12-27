@@ -8,6 +8,7 @@ export function renderBlocks(yd, m, redo) {
     (yd.months[m] || []).forEach((b, bi) => {
         const div = document.createElement('div');
         div.className = 'category-block';
+        if (['通帳', '財布', '競馬'].includes(b.title)) div.classList.add('no-border-block');
         div.innerHTML = `<div class="cat-header">
             <input class="cat-title-input" value="${b.title}">
             <button class="btn-toggle">${b.isOpen ? '－' : '＋'}</button>

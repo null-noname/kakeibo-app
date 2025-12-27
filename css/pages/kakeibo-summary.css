@@ -1,21 +1,38 @@
+.summary-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #252525;
+    padding: 8px 5px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    gap: 5px;
+}
+
 .summary-item {
     display: flex;
     align-items: center;
+    flex: 1;
+    justify-content: center;
+}
+
+.summary-label {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-right: 4px;
 }
 
 .summary-input {
     text-align: right;
     color: #80d8ff;
-    width: 120px;
-    height: 2.5em;
+    width: 90px;
+    height: 2.2em;
     font-family: monospace;
     font-weight: bold;
-    letter-spacing: -0.5px;
-    padding-right: 6px;
-    font-size: 1.3em;
+    font-size: 1.1em;
     background: #333;
-    border: 1px solid #555;
-    border-radius: 4px;
+    border: 1px solid #444;
+    border-radius: 6px;
 }
 
 .total-val-box {

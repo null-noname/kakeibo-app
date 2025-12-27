@@ -6,14 +6,17 @@ table {
 
 th,
 td {
-    padding: 4px;
-    border: 1px solid #333;
-    text-align: left;
+    padding: 6px 4px;
+    border: none;
+    border-bottom: 1px solid #333;
 }
 
 th {
-    background: #333;
-    font-size: 0.8em;
+    background: transparent;
+    color: #aaa;
+    font-size: 0.85em;
+    text-align: center;
+    font-weight: normal;
 }
 
 .date-input,

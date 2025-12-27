@@ -1,27 +1,40 @@
 .btn-green {
-    background: #2e7d32;
-    color: #fff;
-    border: 1px solid #4caf50;
-    padding: 8px 14px;
-    border-radius: 4px;
+    background: #9ccc65;
+    color: #000;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: bold;
     cursor: pointer;
 }
 
-.btn-red {
-    background: #c62828;
+.btn-red,
+.btn-del {
+    background: #e53935 !important;
     color: #fff;
-    border: 1px solid #e57373;
+    border: none;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-indigo,
+.btn-edit {
+    background: #3949ab;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
 .mini-btn {
-    background: #333;
-    color: #fff;
-    border: 1px solid #444;
+    background: #e0e0e0;
+    color: #000;
+    border: none;
     padding: 2px 6px;
-    border-radius: 3px;
+    border-radius: 6px;
+    font-weight: bold;
     cursor: pointer;
     font-size: 1.0em;
     display: flex;
@@ -31,11 +44,12 @@
 
 .add-row-btn {
     width: 100%;
-    padding: 10px;
-    background: #333;
+    padding: 12px;
+    background: #444;
     color: #81c784;
-    border: 1px dashed #444;
-    border-radius: 8px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
     cursor: pointer;
     font-size: 0.9em;
 }

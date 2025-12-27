@@ -1,8 +1,9 @@
 export function getRowHtml(it, idx) {
+    const val = it.cost ?? (it.price || 0);
     return `<td><input class="date-input" value="${it.date || ''}"></td>
         <td><textarea class="kakeibo-text">${it.text || ''}</textarea></td>
-        <td><input class="money-input" value="${(it.cost || 0).toLocaleString()}" type="tel"></td>
-        <td><button class="mini-btn btn-up">↑</button></td>
+        <td><input class="money-input" value="${Number(val).toLocaleString()}" type="tel"></td>
+        <td><button class="mini-btn">▲</button></td>
         <td><button class="mini-btn btn-del">×</button></td>`;
 }
 
