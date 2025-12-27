@@ -29,14 +29,11 @@ select {
     border: 1px solid #333;
     padding: 2px 0;
     scrollbar-width: none;
-    /* Firefox */
 }
 
 .month-selector::-webkit-scrollbar {
     display: none;
 }
-
-/* Chrome/Safari */
 
 .month-btn {
     flex: 0 0 auto;
@@ -74,15 +71,14 @@ h2#monthly-header-title {
     margin-bottom: 15px;
     border-radius: 10px;
     border: 1px solid #333;
-    gap: 20px;
+    gap: 15px;
 }
 
 .summary-item {
     display: flex;
     flex-direction: row;
-    /* 横に並べる */
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .summary-label {
@@ -95,36 +91,25 @@ h2#monthly-header-title {
 .total-val-box {
     text-align: center;
     color: #80d8ff;
-    min-width: 100px;
-    height: 1.8em;
+    padding: 0 8px;
+    min-width: 90px;
+    height: 1.6em;
     font-family: 'Roboto Mono', monospace;
     font-weight: bold;
     font-size: 1.1em;
     background: rgba(42, 42, 42, 0.5);
     border: none;
-    /* 枠線を消してスッキリさせる */
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.total-val-box {
-    color: #fff;
-    background: transparent;
 }
 
 /* カテゴリーブロック */
 .category-block {
     background: #181818;
-    padding: 12px;
-    margin-bottom: 30px;
+    padding: 10px 12px;
+    margin-bottom: 25px;
     border-radius: 12px;
     border: 1px solid #333;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     width: 100%;
-    /* 固定を解除し画面いっぱいに */
-    max-width: 100%;
 }
 
 .cat-header {
@@ -132,10 +117,8 @@ h2#monthly-header-title {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-    padding: 5px 0;
 }
 
-/* 「通帳」「財布」などのタイトル - 枠なし太字拡大 */
 .cat-title-input {
     background: transparent !important;
     border: none !important;
@@ -145,7 +128,6 @@ h2#monthly-header-title {
     text-align: left !important;
     padding: 0 !important;
     height: auto !important;
-    flex: 1;
 }
 
 /* テーブルレイアウト */
@@ -153,18 +135,19 @@ table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 4px;
-    table-layout: fixed;
+    table-layout: auto;
+    /* ここをautoに変更：内容が伸縮可能に */
 }
 
 th {
-    color: #888;
+    color: #666;
     font-weight: normal;
     font-size: 0.8em;
     padding-bottom: 4px;
     text-align: center;
 }
 
-/* 列幅の調整（10文字対応の黄金比） */
+/* 列幅の再定義（autoレイアウト用） */
 .col-date {
     width: 32px;
 }
@@ -177,15 +160,17 @@ th {
     width: 50px;
 }
 
-/* ▲×ボタン用 */
+/* 内容欄：残ったスペースをすべて使い、広がるように設定 */
+.col-text {
+    width: auto;
+}
 
 td {
     vertical-align: middle;
 }
 
-/* 入力要素のスタイル - 徹底した1行表示と高さ抑制 */
-input,
-textarea {
+/* 入力要素のスタイル - 究極の1行表示 */
+input {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #444;
@@ -193,10 +178,11 @@ textarea {
     border-radius: 4px;
     color: #fff;
     text-align: center;
-    padding: 0 1px;
+    padding: 1px 2px;
     font-size: 0.9em;
     height: 1.3em;
-    line-height: 1.3em;
+    /* 超薄型の1行 */
+    line-height: normal;
 }
 
 input.money-input {
@@ -205,15 +191,11 @@ input.money-input {
     font-weight: bold;
 }
 
-textarea.kakeibo-text {
-    resize: none;
-    word-break: keep-all;
+/* 内容入力：折り返しを確実に防ぎ、広い画面ではいっぱいに広がる */
+.kakeibo-text {
+    text-align: center !important;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: clip;
-    /* 10文字を確実に見せる */
-    font-family: sans-serif;
-    display: block;
 }
 
 /* フッター（追加ボタン周り） */
@@ -230,11 +212,14 @@ textarea.kakeibo-text {
     background: var(--accent);
     color: #fff;
     padding: 10px;
-    /* スリム化 */
     border: none;
     border-radius: 10px;
     font-size: 1.0em;
     font-weight: bold;
     width: 100%;
     cursor: pointer;
+}
+
+.total-row td {
+    padding-top: 5px;
 }

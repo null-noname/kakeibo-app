@@ -113,14 +113,13 @@ function renderBlockItems(parent, b, bi, m) {
 
         tr.innerHTML = `
             <td class="col-date"><input class="day-input" value="${it.date || ''}" type="tel" maxlength="2" placeholder="日"></td>
-            <td class="col-text"><textarea class="kakeibo-text">${it.name || ''}</textarea></td>
+            <td class="col-text"><input class="kakeibo-text" value="${it.name || ''}"></td>
             <td class="col-money"><input class="money-input" value="${formatNum(v1)}" type="tel"></td>
             <td class="col-money"><input class="money-input" value="${formatNum(v2)}" type="tel"></td>
             <td class="col-btns"><button class="mini-btn">▲</button><button class="mini-btn btn-del">×</button></td>`;
 
-        const ins = tr.querySelectorAll('input, textarea');
+        const ins = tr.querySelectorAll('input');
         ins[0].onblur = (e) => { it.date = e.target.value; saveDB({}); };
-        ins[1].oninput = (e) => autoHeight(e.target);
         ins[1].onblur = (e) => { it.name = e.target.value; saveDB({}); };
 
         const setVal = (idx, k) => {
@@ -128,7 +127,6 @@ function renderBlockItems(parent, b, bi, m) {
             ins[idx].onblur = (e) => {
                 const val = parseNum(e.target.value);
                 it[k] = val;
-                // 古いキーを削除してクリーンアップ
                 delete it.plan; delete it.out; delete it.act; delete it.in;
                 saveDB({}); render();
             };
@@ -149,7 +147,6 @@ function renderBlockItems(parent, b, bi, m) {
             }
         };
 
-        setTimeout(() => autoHeight(ins[1]), 0);
         tbody.appendChild(tr);
     });
 
