@@ -1,0 +1,23 @@
+input.day-input {
+    text-align: center;
+    width: 100%;
+    font-family: monospace;
+    font-weight: bold;
+}
+
+input.money-input {
+    text-align: right;
+    color: #80d8ff;
+    width: 100%;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+
+textarea.kakeibo-text {
+    width: 100%;
+    color: #eee;
+    resize: none;
+    line-height: 1.4em;
+    padding: 4px 2px;
+}

@@ -3,7 +3,10 @@ import { formatNum } from './kakeibo-utils.js';
 
 export function renderFooter(parent, b, bi, m, redo) {
     let s1 = 0, s2 = 0;
-    (b.items || []).forEach(it => { s1 += (it.v1 || 0); s2 += (it.v2 || 0); });
+    (b.items || []).forEach(it => {
+        s1 += (it.v1 ?? (it.plan || it.out || 0));
+        s2 += (it.v2 ?? (it.act || it.in || 0));
+    });
     const tr = document.createElement('tr');
     tr.className = 'total-row';
     tr.innerHTML = `<td></td><td class="total-label">合計</td>

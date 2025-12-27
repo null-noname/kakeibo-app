@@ -1,12 +1,21 @@
-.summary-area {
+.summary-item {
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    background: #252525;
-    padding: 10px 5px;
-    margin-bottom: 10px;
+}
+
+.summary-input {
+    text-align: right;
+    color: #80d8ff;
+    width: 120px;
+    height: 2.5em;
+    font-family: monospace;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+    padding-right: 6px;
+    font-size: 1.3em;
+    background: #333;
+    border: 1px solid #555;
     border-radius: 4px;
-    border: 1px solid #383838;
 }
 
 .total-val-box {
