@@ -51,11 +51,12 @@ select {
     border-radius: 4px;
 }
 
-/* メイン見出し */
+/* メイン見出し - 白字化 */
 h2#monthly-header-title {
     font-size: 1.3em;
     margin: 10px 0;
-    color: var(--accent);
+    color: #fff !important;
+    /* 白字に */
     text-align: center;
     padding-bottom: 5px;
     border-bottom: 1px solid #333;
@@ -114,20 +115,26 @@ h2#monthly-header-title {
 
 .cat-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    /* 左寄せ */
     align-items: center;
     margin-bottom: 15px;
+    gap: 10px;
 }
 
+/* 「通帳」「財布」などのタイトル - 枠なし太字拡大・幅縮小 */
 .cat-title-input {
     background: transparent !important;
     border: none !important;
-    font-size: 1.4em !important;
+    font-size: 1.3em !important;
     font-weight: bold !important;
     color: #fff !important;
     text-align: left !important;
     padding: 0 !important;
     height: auto !important;
+    width: 75px !important;
+    /* 5文字程度に固定 */
+    flex: none !important;
 }
 
 /* テーブルレイアウト */
@@ -136,18 +143,17 @@ table {
     border-collapse: separate;
     border-spacing: 0 4px;
     table-layout: auto;
-    /* ここをautoに変更：内容が伸縮可能に */
 }
 
 th {
     color: #666;
     font-weight: normal;
     font-size: 0.8em;
-    padding-bottom: 4px;
+    padding-bottom: 2px;
     text-align: center;
 }
 
-/* 列幅の再定義（autoレイアウト用） */
+/* 列幅の再定義 */
 .col-date {
     width: 32px;
 }
@@ -157,10 +163,10 @@ th {
 }
 
 .col-btns {
-    width: 50px;
+    width: 48px;
+    /* さらに微調整 */
 }
 
-/* 内容欄：残ったスペースをすべて使い、広がるように設定 */
 .col-text {
     width: auto;
 }
@@ -169,8 +175,9 @@ td {
     vertical-align: middle;
 }
 
-/* 入力要素のスタイル - 究極の1行表示 */
-input {
+/* 入力要素のスタイル */
+input,
+textarea {
     width: 100%;
     box-sizing: border-box;
     border: 1px solid #444;
@@ -178,10 +185,9 @@ input {
     border-radius: 4px;
     color: #fff;
     text-align: center;
-    padding: 1px 2px;
+    padding: 0 2px;
     font-size: 0.9em;
     height: 1.3em;
-    /* 超薄型の1行 */
     line-height: normal;
 }
 
@@ -191,11 +197,26 @@ input.money-input {
     font-weight: bold;
 }
 
-/* 内容入力：折り返しを確実に防ぎ、広い画面ではいっぱいに広がる */
-.kakeibo-text {
-    text-align: center !important;
-    white-space: nowrap;
+/* 内容入力：10文字で折り返す設定 */
+textarea.kakeibo-text {
+    resize: none;
+    word-break: break-all;
+    white-space: pre-wrap;
     overflow: hidden;
+    height: 1.3em;
+    /* 初期は1行 */
+    line-height: 1.25em;
+    font-family: sans-serif;
+    display: block;
+    padding: 1px 0;
+}
+
+/* ▲×ボタン：さらにもう一回り小さく */
+.mini-btn {
+    padding: 2px 4px !important;
+    font-size: 0.75em !important;
+    height: auto !important;
+    min-width: 18px !important;
 }
 
 /* フッター（追加ボタン周り） */
@@ -203,18 +224,19 @@ input.money-input {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 15px;
-    padding-bottom: 40px;
+    margin: 10px 0;
+    padding-bottom: 30px;
     width: 100%;
 }
 
 .big-btn {
     background: var(--accent);
     color: #fff;
-    padding: 10px;
+    padding: 6px;
+    /* 極限まで細く */
     border: none;
-    border-radius: 10px;
-    font-size: 1.0em;
+    border-radius: 8px;
+    font-size: 0.95em;
     font-weight: bold;
     width: 100%;
     cursor: pointer;
@@ -222,4 +244,9 @@ input.money-input {
 
 .total-row td {
     padding-top: 5px;
+}
+
+.total-val-box {
+    background: transparent;
+    color: #fff;
 }
