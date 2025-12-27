@@ -18,7 +18,8 @@ body {
     color: var(--text);
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     overflow-x: hidden;
-    padding-top: calc(90px + env(safe-area-inset-top));
+    padding: calc(90px + env(safe-area-inset-top)) 10px 20px 10px;
+    /* 左右余白を均等に */
 }
 
 .hidden {
@@ -50,11 +51,11 @@ body {
 .btn-red,
 .btn-del {
     background: #b71c1c !important;
-    /* 深みのある赤 */
     color: #fff;
     border: none;
-    padding: 6px 12px;
-    border-radius: 8px;
+    padding: 4px 6px;
+    /* mini-btnと統一 */
+    border-radius: 4px;
     cursor: pointer;
 }
 
@@ -82,7 +83,8 @@ body {
 .add-row-btn,
 #btn-memo-add {
     width: 100%;
-    padding: 12px;
+    padding: 8px;
+    /* スリム化 */
     background: var(--accent);
     color: #fff;
     border: none;

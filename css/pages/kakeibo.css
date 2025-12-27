@@ -164,17 +164,17 @@ th {
     text-align: center;
 }
 
-/* 列幅の調整（黄金比） */
+/* 列幅の調整（10文字対応の黄金比） */
 .col-date {
-    width: 36px;
+    width: 32px;
 }
 
 .col-money {
-    width: 85px;
+    width: 72px;
 }
 
 .col-btns {
-    width: 52px;
+    width: 50px;
 }
 
 /* ▲×ボタン用 */
@@ -183,7 +183,7 @@ td {
     vertical-align: middle;
 }
 
-/* 入力要素のスタイル - 完璧な1行表示 */
+/* 入力要素のスタイル - 徹底した1行表示と高さ抑制 */
 input,
 textarea {
     width: 100%;
@@ -193,12 +193,10 @@ textarea {
     border-radius: 4px;
     color: #fff;
     text-align: center;
-    padding: 1px;
-    /* 極限まで詰め */
-    font-size: 0.95em;
-    height: 1.5em;
-    /* 高さを抑えて1行に */
-    line-height: normal;
+    padding: 0 1px;
+    font-size: 0.9em;
+    height: 1.3em;
+    line-height: 1.3em;
 }
 
 input.money-input {
@@ -211,11 +209,9 @@ textarea.kakeibo-text {
     resize: none;
     word-break: keep-all;
     white-space: nowrap;
-    /* 改行を禁止 */
     overflow: hidden;
-    /* はみ出しを隠す */
-    text-overflow: ellipsis;
-    /* 必要なら三点リーダー */
+    text-overflow: clip;
+    /* 10文字を確実に見せる */
     font-family: sans-serif;
     display: block;
 }
@@ -225,20 +221,20 @@ textarea.kakeibo-text {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 20px;
-    padding-bottom: 50px;
+    margin-top: 15px;
+    padding-bottom: 40px;
     width: 100%;
 }
 
 .big-btn {
     background: var(--accent);
     color: #fff;
-    padding: 14px;
+    padding: 10px;
+    /* スリム化 */
     border: none;
     border-radius: 10px;
     font-size: 1.0em;
     font-weight: bold;
     width: 100%;
-    /* 固定を解除 */
     cursor: pointer;
 }
