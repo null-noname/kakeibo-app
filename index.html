@@ -6,17 +6,132 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>家計簿</title>
-    <link rel="stylesheet" href="./css/base.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 
 <body>
-    <div id="header"></div>
-    <div id="app"></div>
-    <div id="sync-status"></div>
-    <script type="module" src="./js/main.js"></script>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h1 style="color:#81c784; margin-bottom:30px;">家計簿</h1>
+            <button class="login-btn" onclick="loginWithGoogle()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                Googleでログイン
+            </button>
+        </div>
+    </div>
+
+    <div id="main-app" style="display:none;">
+        <div class="header-area">
+            <div class="app-title-bar">家計簿</div>
+            <div class="top-tabs">
+                <div class="tab-item" onclick="switchView('memo')" id="tab-memo">📝 メモ</div>
+                <div class="tab-item" onclick="switchView('fixed')" id="tab-fixed">🏢 固定費</div>
+                <div class="tab-item active" onclick="switchView('kakeibo')" id="tab-kakeibo">💰 収支</div>
+                <div class="tab-item" onclick="switchView('save')" id="tab-save">💾 保存</div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- ToDo準備エリア -->
+            <!-- ToDoエリア -->
+            <div id="todo-section" class="memo-card">
+                <div class="memo-card-header">
+                    <span class="memo-card-title">ToDoリスト</span>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <input type="text" id="todo-input" placeholder="新しいタスクを入力..." style="flex:1; height:2.5em;">
+                    <button class="btn-green" style="width:60px; height:2.5em;" onclick="addTodo()">追加</button>
+                </div>
+                <div id="todo-list" style="margin-top:15px;">
+                    <!-- ここにタスクが表示されます -->
+                </div>
+            </div>
+
+            <div id="view-memo" class="view-section">
+                <div id="memo-list-view">
+                    <button class="add-row-btn" onclick="addNewMemo()">＋ 新しいメモを追加</button>
+                    <div id="memo-list-container" style="margin-top:15px;"></div>
+                </div>
+                <div id="memo-editor">
+                    <div class="editor-toolbar">
+                        <button class="btn-green" onclick="closeMemoEditor()">＜ 戻る</button>
+                        <button class="btn-red" onclick="deleteCurrentMemo()">削除</button>
+                    </div>
+                    <input type="text" id="memo-edit-title" class="memo-title-input" placeholder="タイトル"
+                        onblur="saveCurrentMemo()">
+                    <textarea id="memo-edit-body" class="memo-body" placeholder="内容を入力..."
+                        onblur="saveCurrentMemo()"></textarea>
+                </div>
+            </div>
+
+            <div id="view-fixed" class="view-section">
+                <h2>固定費</h2>
+                <div id="annual-section">
+                    <div class="annual-group">
+                        <div class="annual-header">
+                            <span>年間</span>
+                            <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+                        </div>
+                        <div id="content-annual-year">
+                            <div id="annual-table-year"></div>
+                            <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
+                        </div>
+                    </div>
+                    <div class="annual-group">
+                        <div class="annual-header">
+                            <span>月間</span>
+                            <button class="btn-toggle" onclick="toggleAnnualSub('month')"
+                                id="btn-annual-month">－</button>
+                        </div>
+                        <div id="content-annual-month">
+                            <div id="annual-table-month"></div>
+                            <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-kakeibo" class="view-section active">
+                <div class="year-controls">
+                    <select id="year-select" onchange="changeYear()"></select>
+                    <div>
+                        <button class="btn-year-ctrl bg-green" onclick="addNewYear()">追加</button>
+                        <button class="btn-year-ctrl bg-red" onclick="deleteYear()">削除</button>
+                    </div>
+                </div>
+                <div class="month-selector" id="month-tabs"></div>
+                <h2 id="monthly-header-title">1月の収支</h2>
+                <div id="monthly-container"></div>
+                <div class="add-block-area">
+                    <button class="big-btn" onclick="addCategoryBlock('standard')">リスト1を追加</button>
+                    <button class="big-btn" onclick="addCategoryBlock('detail')">リスト2を追加</button>
+                </div>
+            </div>
+
+            <div id="view-save" class="view-section">
+                <div class="settings-menu">
+                    <h2 style="border:none; justify-content:center;">データ管理</h2>
+                    <button class="btn-backup" onclick="shareDataText()">📤 データを書き出し (共有)</button>
+                    <button class="btn-backup" style="background:#00695c; border-color:#00897b;"
+                        onclick="exportDataToClipboard()">📋 クリップボードにコピー</button>
+                    <hr style="border:0; border-top:1px solid #444; margin:20px 0;">
+                    <textarea id="backup-box" style="width:100%; height:100px; background:#2a2a2a; color:#fff;"
+                        placeholder="ここにデータを貼り付けて復元"></textarea>
+                    <button class="btn-backup-sub" onclick="importDataFromText()">📂 データを復元 (読み込み)</button>
+                    <button onclick="logout()"
+                        style="width:100%; margin-top:30px; background:#444; color:#ccc; border:none; padding:10px; cursor:pointer; border-radius:4px;">ログアウト</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sync-status">同期待機中...</div>
+
+    <script src="script.js" defer></script>
 </body>
 
 </html>
