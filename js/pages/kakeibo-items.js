@@ -11,7 +11,7 @@ export function renderItems(parent, b, bi, m, redo, type) {
     (b.items || []).forEach((it, ii) => {
         tb.appendChild(renderRow(it, bi, ii, m, redo, b.type));
     });
-    renderFooter(tb, b, bi, m, redo);
     t.appendChild(tb);
     parent.appendChild(t);
+    renderFooter(tb, b, bi, m, redo);
 }

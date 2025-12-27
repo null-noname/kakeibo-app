@@ -1,8 +1,8 @@
 .btn-green {
     background: #2e7d32;
     color: #fff;
-    border: none;
-    padding: 8px 12px;
+    border: 1px solid #4caf50;
+    padding: 8px 14px;
     border-radius: 4px;
     cursor: pointer;
 }
@@ -10,8 +10,8 @@
 .btn-red {
     background: #c62828;
     color: #fff;
-    border: none;
-    padding: 8px 12px;
+    border: 1px solid #e57373;
+    padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
 }
