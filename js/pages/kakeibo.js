@@ -98,8 +98,8 @@ function renderBlockItems(parent, b, bi, m) {
     const table = document.createElement('table');
     const isStandard = b.type === 'standard';
     const h = isStandard ?
-        `<tr><th class="col-date">日付</th><th class="col-text">内容</th><th class="col-money">予定</th><th class="col-money">確定</th><th class="col-btns"></th></tr>` :
-        `<tr><th class="col-date">日付</th><th class="col-text">重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btns"></th></tr>`;
+        `<tr><th class="col-date">日</th><th class="col-text">内容</th><th class="col-money">予定</th><th class="col-money">確定</th><th class="col-btns"></th></tr>` :
+        `<tr><th class="col-date">日</th><th class="col-text">重賞名</th><th class="col-money">入金</th><th class="col-money">払戻</th><th class="col-btns"></th></tr>`;
     table.innerHTML = `<thead>${h}</thead>`;
 
     const tbody = document.createElement('tbody');
@@ -112,7 +112,7 @@ function renderBlockItems(parent, b, bi, m) {
         sum1 += v1; sum2 += v2;
 
         tr.innerHTML = `
-            <td class="col-date"><div class="date-input-wrap"><input class="day-input" value="${it.date || ''}" type="tel" maxlength="2"><span>日</span></div></td>
+            <td class="col-date"><input class="day-input" value="${it.date || ''}" type="tel" maxlength="2" placeholder="日"></td>
             <td class="col-text"><textarea class="kakeibo-text">${it.name || ''}</textarea></td>
             <td class="col-money"><input class="money-input" value="${formatNum(v1)}" type="tel"></td>
             <td class="col-money"><input class="money-input" value="${formatNum(v2)}" type="tel"></td>

@@ -51,17 +51,17 @@ select {
     border-radius: 4px;
 }
 
-/* メイン見出し - 白字化 */
+/* メイン見出し */
 h2#monthly-header-title {
     font-size: 1.3em;
     margin: 10px 0;
-    color: #fff !important;
+    color: var(--accent);
     text-align: center;
     padding-bottom: 5px;
     border-bottom: 1px solid #333;
 }
 
-/* サマリー（集計）エリア - 横並び配置 */
+/* サマリー（集計）エリア */
 .summary-area {
     display: flex;
     justify-content: space-around;
@@ -115,83 +115,62 @@ h2#monthly-header-title {
 .cat-header {
     display: flex;
     justify-content: space-between;
-    /* 「－」ボタンを右端へ */
     align-items: center;
-    margin-bottom: 12px;
-    gap: 10px;
+    margin-bottom: 15px;
 }
 
-/* 項目タイトル（通帳など） - 正確に5文字100px */
+/* 項目タイトル（通帳など） - 余計な固定幅ルールを削除し以前の状態へ */
 .cat-title-input {
     background: transparent !important;
     border: none !important;
-    font-size: 1.3em !important;
+    font-size: 1.4em !important;
     font-weight: bold !important;
     color: #fff !important;
     text-align: left !important;
     padding: 0 !important;
     height: auto !important;
-    width: 100px !important;
-    /* 100px = 正確に5文字分 */
-    flex: none !important;
+    flex: 1;
 }
 
-/* テーブルレイアウト */
+/* テーブルレイアウト - 折り返しを有効にするためautoに */
 table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 4px;
-    table-layout: fixed;
-    /* 折り返しを確実に制御するためにfixedに戻す */
+    table-layout: auto;
 }
 
 th {
     color: #666;
     font-weight: normal;
     font-size: 0.8em;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
     text-align: center;
 }
 
-/* 列幅の精密定義 */
+/* 列幅設定 */
 .col-date {
-    width: 48px;
-    /* 「12日」が入る幅 */
+    width: 36px;
 }
 
 .col-money {
-    width: 72px;
+    width: 85px;
 }
 
 .col-btns {
-    width: 44px;
-    /* ▲×が枠に重ならないギリギリの細さ */
+    width: 52px;
 }
 
 .col-text {
-    width: 110px;
-    /* ここが重要：10文字でピタッと折り返す幅に調整(約10文字分) */
+    width: auto;
+    /* 余ったスペースを最大化 */
 }
 
 td {
     vertical-align: middle;
-    padding: 0;
-    /* 枠のズレをなくす */
 }
 
-.date-input-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-}
-
-.date-input-wrap span {
-    font-size: 0.8em;
-    color: #aaa;
-}
-
-/* 入力要素のスタイル */
+/* 入力要素の基本スタイル */
 input,
 textarea {
     width: 100%;
@@ -201,11 +180,10 @@ textarea {
     border-radius: 4px;
     color: #fff;
     text-align: center;
-    padding: 0 1px;
-    font-size: 0.9em;
-    height: 1.3em;
-    line-height: 1.25em;
-    display: block;
+    padding: 1px 2px;
+    font-size: 0.95em;
+    height: auto;
+    line-height: normal;
 }
 
 input.money-input {
@@ -214,56 +192,64 @@ input.money-input {
     font-weight: bold;
 }
 
-/* 内容入力：10文字で強制的に折り返す設定 */
+/* 内容入力：折り返しを確実に有効化 */
 textarea.kakeibo-text {
     resize: none;
     word-break: break-all;
     white-space: pre-wrap;
     overflow: hidden;
-    height: 1.3em;
+    min-height: 1.5em;
     font-family: sans-serif;
-    padding: 1px 0;
+    display: block;
+    text-align: left;
+    padding: 2px 4px;
 }
 
-/* ▲×ボタン：枠にピッタリ重なるように調整 */
+/* ▲×ボタン - 以前の正常なサイズへ */
 .mini-btn {
-    padding: 2px 4px !important;
-    font-size: 0.75em !important;
-    border-radius: 0 !important;
-    /* 角丸をなくして枠に合わせる */
-    height: 1.3em !important;
-    min-width: 20px !important;
-    line-height: 1.3em !important;
+    background: #757575;
+    color: #fff;
+    border: none;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
 }
 
-.col-btns button:first-child {
-    border-top-left-radius: 4px !important;
-    border-bottom-left-radius: 4px !important;
+.col-btns .mini-btn {
+    border-radius: 0;
 }
 
-.col-btns button:last-child {
-    border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 4px !important;
+.col-btns .mini-btn:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
-/* フッター（追加ボタン周り） */
+.col-btns .mini-btn:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    background: #b71c1c;
+}
+
+/* フッター（追加ボタン周り） - パディングを復元（元の適切なサイズ） */
 .add-block-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 8px 0;
-    padding-bottom: 20px;
+    margin-top: 20px;
+    padding-bottom: 40px;
     width: 100%;
 }
 
 .big-btn {
     background: var(--accent);
     color: #fff;
-    padding: 4px;
-    /* 指示通りさらに薄く */
+    padding: 12px;
+    /* 元の押しやすいサイズ */
     border: none;
-    border-radius: 8px;
-    font-size: 0.9em;
+    border-radius: 10px;
+    font-size: 1.0em;
     font-weight: bold;
     width: 100%;
     cursor: pointer;
