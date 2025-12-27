@@ -1,0 +1,88 @@
+/* --- 収支画面 レイアウト設計 (1000文字以内) --- */
+
+/* 1. ナビゲーション: シークバー消失の解消 */
+.month-selector {
+    display: flex;
+    overflow-x: auto;
+    /* 横スクロールを許可 */
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    background: #000;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+    scrollbar-width: none;
+    /* スクロールバー自体は隠す */
+}
+
+.month-selector::-webkit-scrollbar {
+    display: none;
+}
+
+.month-btn {
+    flex: 0 0 auto;
+    /* 幅を固定して並べる */
+    padding: 12px 18px;
+    color: #888;
+    cursor: pointer;
+}
+
+/* 2. テーブル: 右側の空白解消と配置固定 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* 列幅をpx指定で固定 */
+    margin-bottom: 20px;
+}
+
+/* 各列の幅をミリ単位で指定 */
+.col-date {
+    width: 75px;
+}
+
+/* 【12】日の幅 */
+.col-text {
+    width: auto;
+}
+
+/* 内容（ここが余白をすべて埋める） */
+.col-money {
+    width: 85px;
+}
+
+/* 金額 */
+.col-btns {
+    width: 62px;
+}
+
+/* ▲×ボタンの幅 */
+
+/* 3. ヘッダー: タイトル5文字と－ボタンの右固定 */
+.cat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.cat-title-input {
+    width: 6em !important;
+    /* 約5-6文字分に固定 */
+    flex: 0 0 auto;
+    background: transparent !important;
+    border: none !important;
+    font-size: 1.4em !important;
+    font-weight: bold !important;
+    color: #fff !important;
+}
+
+.btn-toggle {
+    margin-left: auto;
+    /* 右端に押し出す */
+    background: #444;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
