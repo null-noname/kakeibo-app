@@ -147,7 +147,7 @@
         }
 
         .col-btn {
-            width: 28px;
+            width: 34px;
         }
 
         input,
@@ -166,7 +166,8 @@
             color: #eee;
             resize: none;
             line-height: 1.4em;
-            min-height: 2.2em;
+            height: 30px;
+            min-height: 30px;
             white-space: pre-wrap;
             word-break: break-all;
             overflow: hidden;
@@ -175,7 +176,7 @@
         }
 
         input {
-            height: 34px;
+            height: 30px;
             box-sizing: border-box;
         }
 
@@ -208,14 +209,14 @@
 
         .mini-btn {
             width: 100%;
-            height: 34px;
+            height: 30px;
             padding: 0;
             margin: 0;
             border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.0em;
+            font-size: 0.9em;
             cursor: pointer;
             border: 1px solid #555;
         }
@@ -226,7 +227,7 @@
             font-weight: bold;
             border: 1px solid #999;
             width: 32px;
-            height: 34px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -236,9 +237,11 @@
         }
 
         .btn-del {
-            background: #333;
-            color: #e57373;
+            background: #c62828;
+            color: #fff;
+            border: 1px solid #e57373;
             font-weight: bold;
+            border-radius: 3px;
         }
 
         .memo-card {
@@ -281,7 +284,7 @@
             border: 1px solid #555;
             border-radius: 4px;
             padding: 0 12px;
-            height: 34px;
+            height: 30px;
             font-size: 0.9em;
             cursor: pointer;
             display: flex;
@@ -294,7 +297,7 @@
             border: 1px solid #555;
             border-radius: 4px;
             width: 32px;
-            height: 34px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -308,7 +311,7 @@
             border: 1px solid #4caf50;
             border-radius: 4px;
             width: 32px;
-            height: 34px;
+            height: 30px;
             font-weight: bold;
             font-size: 1.2em;
             display: flex;
@@ -468,8 +471,8 @@
             color: #fff;
             border: 1px solid #555;
             border-radius: 4px;
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 30px;
             font-weight: bold;
             font-size: 1.2em;
             margin-left: 8px;
@@ -709,7 +712,7 @@
 
         .todo-item-input {
             flex: 1;
-            height: 34px;
+            height: 30px;
             box-sizing: border-box;
             background: transparent;
             border: none;
