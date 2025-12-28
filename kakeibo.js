@@ -381,10 +381,14 @@ export function delBk(bi, m) {
 
 export function addIt(bi, m) {
     const data = window.data;
-    const targetMonth = m || data.years[data.currentYear].activeMonth || 1;
-    const b = data.years[data.currentYear].months[targetMonth][bi];
-    b.items.push(b.type === 'standard' ? { date: "", name: "", plan: 0, act: 0 } : { date: "", name: "", out: 0, in: 0 });
-    if (typeof window.saveData === 'function') window.saveData();
+    const targetMonth = m || (data.years[data.currentYear] ? data.years[data.currentYear].activeMonth : 1);
+    const months = data.years[data.currentYear].months;
+    const b = months[targetMonth][bi];
+    if (b) {
+        if (!b.items) b.items = [];
+        b.items.push(b.type === 'standard' ? { date: "", name: "", plan: 0, act: 0 } : { date: "", name: "", out: 0, in: 0 });
+        if (typeof window.saveData === 'function') window.saveData();
+    }
     renderKakeibo();
 }
 
