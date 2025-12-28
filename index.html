@@ -756,26 +756,29 @@
                     </div>
                 </div>
             </div>
-            <h2>固定費</h2>
-            <div id="annual-section">
-                <div class="annual-group">
-                    <div class="annual-header">
-                        <span>年間</span>
-                        <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+            <div id="view-fixed" class="view-section">
+                <h2>固定費</h2>
+                <div id="annual-section">
+                    <div class="annual-group">
+                        <div class="annual-header">
+                            <span>年間</span>
+                            <button class="btn-toggle" onclick="toggleAnnualSub('year')" id="btn-annual-year">－</button>
+                        </div>
+                        <div id="content-annual-year">
+                            <div id="annual-table-year"></div>
+                            <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
+                        </div>
                     </div>
-                    <div id="content-annual-year">
-                        <div id="annual-table-year"></div>
-                        <button class="add-row-btn" onclick="addAnnualItem('year')">追加</button>
-                    </div>
-                </div>
-                <div class="annual-group">
-                    <div class="annual-header">
-                        <span>月間</span>
-                        <button class="btn-toggle" onclick="toggleAnnualSub('month')" id="btn-annual-month">－</button>
-                    </div>
-                    <div id="content-annual-month">
-                        <div id="annual-table-month"></div>
-                        <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                    <div class="annual-group">
+                        <div class="annual-header">
+                            <span>月間</span>
+                            <button class="btn-toggle" onclick="toggleAnnualSub('month')"
+                                id="btn-annual-month">－</button>
+                        </div>
+                        <div id="content-annual-month">
+                            <div id="annual-table-month"></div>
+                            <button class="add-row-btn" onclick="addAnnualItem('month')">追加</button>
+                        </div>
                     </div>
                 </div>
             </div>
