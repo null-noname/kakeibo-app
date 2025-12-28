@@ -21,7 +21,7 @@ export function renderMemoList() {
                 <span class="memo-card-title">${memo.title}</span>
                 <div class="memo-ctrl-btns">
                     <button class="btn-edit-mode" onclick="openMemoEditor('${memo.id}')">✐ 編集</button>
-                    <button class="btn-icon" onclick="moveMemo('${memo.id}','up')">↑</button>
+                    <button class="btn-up" onclick="moveMemo('${memo.id}','up')">▲</button>
                     <button class="btn-toggle-memo" onclick="toggleMemo('${memo.id}')">${memo.isOpen ? '－' : '＋'}</button>
                 </div>
             </div>

@@ -23,6 +23,7 @@ export function renderTodoList() {
                 <span class="memo-card-title">${todo.title}</span>
                 <div class="memo-ctrl-btns">
                     <button class="btn-edit-mode" onclick="openTodoEditor('${todo.id}')">✐ 編集</button>
+                    <button class="btn-up" onclick="moveTodo('${todo.id}','up')">▲</button>
                     <button class="btn-toggle-memo" onclick="toggleTodo('${todo.id}')">${todo.isOpen ? '－' : '＋'}</button>
                 </div>
             </div>
@@ -203,6 +204,20 @@ export function deleteCurrentTodo() {
 }
 
 /**
+ * ToDoの順序移動
+ */
+export function moveTodo(id, dir) {
+    const data = window.data;
+    if (!data || !data.todos) return;
+    const i = data.todos.findIndex(t => t.id === id);
+    if (dir === 'up' && i > 0) {
+        [data.todos[i], data.todos[i - 1]] = [data.todos[i - 1], data.todos[i]];
+    }
+    if (typeof window.saveData === 'function') window.saveData();
+    renderTodoList();
+}
+
+/**
  * ToDoの開閉切り替え
  */
 export function toggleTodo(id) {
@@ -227,3 +242,4 @@ window.saveCurrentTodo = saveCurrentTodo;
 window.deleteCurrentTodo = deleteCurrentTodo;
 window.toggleTodo = toggleTodo;
 window.renderTodoItems = renderTodoItems;
+window.moveTodo = moveTodo;

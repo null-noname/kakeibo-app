@@ -54,7 +54,7 @@ export function saveData(syncAnnual = false) {
 
     const el = document.getElementById('sync-status');
     if (el) {
-        el.innerText = "↑ 送信中...";
+        el.innerText = "送信中...";
     }
 }
 

@@ -220,9 +220,10 @@
         }
 
         .btn-up {
-            background: #333;
-            color: #81c784;
+            background: #ccc;
+            color: #000;
             font-weight: bold;
+            border: 1px solid #999;
         }
 
         .btn-del {

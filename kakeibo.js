@@ -107,7 +107,7 @@ export function renderAnnualTable(cid, list, key) {
         }));
 
         const tdU = document.createElement('td');
-        tdU.innerHTML = idx > 0 ? `<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx})">↑</button>` : '';
+        tdU.innerHTML = idx > 0 ? `<button class="mini-btn btn-up" onclick="moveAnn('${key}',${idx})">▲</button>` : '';
 
         const tdDk = document.createElement('td');
         tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delAnn('${key}',${idx})">×</button>`;
@@ -209,7 +209,7 @@ export function renderMonthlyBlocks(yd, m) {
                 }
 
                 const tdU = document.createElement('td');
-                tdU.innerHTML = ii > 0 ? `<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${m},'up')">↑</button>` : '';
+                tdU.innerHTML = ii > 0 ? `<button class="mini-btn btn-up" onclick="moveIt(${bi},${ii},${m},'up')">▲</button>` : '';
                 const tdDk = document.createElement('td');
                 tdDk.innerHTML = `<button class="mini-btn btn-del" onclick="delIt(${bi},${ii},${m})">×</button>`;
 
