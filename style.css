@@ -1,6 +1,4 @@
-/* ----------------------------------------------------
-    デザインスタイル (V8.09)
-   ---------------------------------------------------- */
+/* --- 基本デザイン (V8.11ベース) --- */
 body {
     font-family: sans-serif;
     margin: 0;
@@ -83,7 +81,7 @@ body {
     cursor: pointer;
     border-bottom: 4px solid transparent;
     transition: all 0.2s;
-    font-size: 1.05em;
+    font-size: 0.95em;
 }
 
 .tab-item.active {
@@ -117,43 +115,49 @@ body {
     }
 }
 
+/* --- テーブル構造の強制復帰 (最優先) --- */
 table {
-    width: 100%;
+    display: table !important;
+    width: 100% !important;
     border-collapse: separate;
     border-spacing: 0 4px;
-    table-layout: fixed;
-    font-size: 0.95em;
+    table-layout: fixed !important;
+    font-size: 0.9em;
 }
 
-th {
-    color: #aaa;
-    font-weight: normal;
-    font-size: 0.85em;
-    text-align: center;
-    padding-bottom: 2px;
+tr {
+    display: table-row !important;
 }
 
+th,
 td {
+    display: table-cell !important;
     vertical-align: top;
     padding: 0 1px;
 }
 
+/* 各列の精密な幅指定 */
 .col-date {
-    width: 54px;
+    width: 35px !important;
 }
 
+/* 半角2文字分 */
 .col-money {
-    width: 70px;
+    width: 80px !important;
 }
 
 .col-btn {
-    width: 68px;
+    width: 28px !important;
 }
+
+/* 削除ボタン1つ分に最適化 */
 
 .ctrl-container {
     display: flex;
-    gap: 2px;
+    gap: 1px;
     justify-content: center;
+    align-items: center;
+    height: 2.2em;
 }
 
 input,
@@ -165,19 +169,22 @@ textarea {
     color: #fff;
     font-size: 1.1em;
     padding: 2px;
+    outline: none;
 }
 
+/* 内容欄の10文字折り返し */
 textarea.kakeibo-text {
-    width: 100%;
+    width: 10em !important;
     color: #eee;
     resize: none;
-    line-height: 1.4em;
+    line-height: 1.2em;
     min-height: 2.2em;
-    white-space: pre-wrap;
-    word-break: break-all;
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
     overflow: hidden;
     vertical-align: middle;
     padding: 4px 2px;
+    font-size: 1.0em;
 }
 
 input {
@@ -189,7 +196,7 @@ input.day-input {
     width: 100%;
     font-family: monospace;
     font-weight: bold;
-    padding: 2px 0;
+    font-size: 0.9em;
 }
 
 input.date-input {
@@ -197,7 +204,7 @@ input.date-input {
     width: 100%;
     font-family: monospace;
     font-weight: bold;
-    padding: 0;
+    font-size: 0.9em;
 }
 
 input.money-input {
@@ -206,23 +213,26 @@ input.money-input {
     width: 100%;
     font-family: monospace;
     font-weight: bold;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
     padding-right: 2px;
-    font-size: 1.0em;
+    font-size: 0.95em;
 }
 
+/* ボタンのデザイン統一 */
 .mini-btn {
-    width: 30px;
-    height: 2.2em;
+    width: 24px;
+    /* 極細幅に合わせ一回り縮小 */
+    height: 22px;
     padding: 0;
     margin: 0;
     border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.0em;
+    font-size: 0.8em;
     cursor: pointer;
     border: 1px solid #555;
+    vertical-align: middle;
 }
 
 .btn-up {
@@ -231,20 +241,34 @@ input.money-input {
     font-weight: bold;
 }
 
+/* 削除ボタンの赤色化 */
 .btn-del {
-    background: #333;
-    color: #e57373;
+    background: #c62828 !important;
+    color: #fff !important;
     font-weight: bold;
+    border: 1px solid #e57373;
 }
 
+/* メモ編集ボタン（藍色） */
+.btn-edit-mode {
+    background: #3949ab;
+    color: #fff;
+    border: 1px solid #5c6bc0;
+    border-radius: 4px;
+    padding: 0 10px;
+    height: 28px;
+    font-size: 0.85em;
+    cursor: pointer;
+}
+
+/* --- カードスタイル --- */
 .memo-card {
     background: #202020;
     border: 1px solid #333;
     border-radius: 8px;
-    padding: 12px 15px;
-    margin-bottom: 15px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
 }
 
 .memo-card-header {
@@ -257,7 +281,7 @@ input.money-input {
 .memo-card-title {
     font-weight: bold;
     color: #81c784;
-    font-size: 1.2em;
+    font-size: 1.1em;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -267,20 +291,7 @@ input.money-input {
 
 .memo-ctrl-btns {
     display: flex;
-    gap: 5px;
-    align-items: center;
-}
-
-.btn-edit-mode {
-    background: #333;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 4px;
-    padding: 0 12px;
-    height: 32px;
-    font-size: 0.9em;
-    cursor: pointer;
-    display: flex;
+    gap: 4px;
     align-items: center;
 }
 
@@ -289,12 +300,12 @@ input.money-input {
     color: #aaa;
     border: 1px solid #555;
     border-radius: 4px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2em;
+    font-size: 1.0em;
     cursor: pointer;
 }
 
@@ -303,38 +314,109 @@ input.money-input {
     color: #fff;
     border: 1px solid #4caf50;
     border-radius: 4px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     font-weight: bold;
-    font-size: 1.2em;
+    font-size: 1.1em;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
 }
 
-.memo-card-body {
-    font-family: 'Consolas', 'Monaco', monospace;
-    color: #e0e0e0;
-    font-size: 1.05em;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-all;
-    border-top: 1px dashed #444;
-    margin-top: 8px;
-    padding-top: 8px;
-}
-
-.memo-card-body.collapsed {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+/* 合計表示の自動調整 */
+.total-val-box {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 3px;
+    text-align: right;
+    color: #fff;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 0.9em;
+    padding: 4px;
+    height: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    letter-spacing: -0.5px;
     overflow: hidden;
-    color: #888;
-    border-top: none;
+    white-space: nowrap;
 }
 
-#memo-editor {
+.total-label {
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    font-size: 1.0em;
+}
+
+/* ToDoスタイル */
+.todo-edit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #333;
+}
+
+.todo-check-wrapper {
+    width: 22px;
+    height: 22px;
+    position: relative;
+}
+
+.todo-check-wrapper input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.todo-checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 22px;
+    height: 22px;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+.todo-check-wrapper input:checked~.todo-checkmark {
+    background: #2e7d32;
+    border-color: #4caf50;
+}
+
+.todo-check-wrapper input:checked~.todo-checkmark::after {
+    content: '✔';
+    color: #fff;
+    font-size: 14px;
+    position: absolute;
+    left: 4px;
+    top: 0;
+}
+
+.todo-input {
+    flex: 1;
+    background: #222;
+    border: 1px solid #444;
+    color: #eee;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 1em;
+}
+
+.todo-input.completed {
+    text-decoration: line-through;
+    color: #666;
+}
+
+#memo-editor,
+#todo-editor {
     display: none;
     position: fixed;
     top: 0;
@@ -347,7 +429,8 @@ input.money-input {
     flex-direction: column;
 }
 
-#memo-editor.active {
+#memo-editor.active,
+#todo-editor.active {
     display: flex;
 }
 
@@ -360,38 +443,11 @@ input.money-input {
     border-bottom: 1px solid #333;
 }
 
-input.memo-title-input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 10px 15px;
-    border-bottom: 1px solid #333;
-    outline: none;
-}
-
-textarea.memo-body {
-    flex: 1;
-    width: 100%;
-    background: #272727;
-    color: #f0f0f0;
-    border: none;
-    padding: 15px;
-    font-size: 16px;
-    line-height: 1.6;
-    font-family: 'Consolas', 'Monaco', monospace;
-    resize: none;
-    outline: none;
-    box-sizing: border-box;
-}
-
 h2 {
-    font-size: 1.2em;
+    font-size: 1.1em;
     border-left: 6px solid #2e7d32;
     padding-left: 10px;
-    margin: 20px 0 10px;
+    margin: 15px 0 8px;
     color: #fff;
     display: flex;
     justify-content: space-between;
@@ -407,71 +463,15 @@ h2 {
     font-size: 1em;
 }
 
-.btn-red {
-    background: #c62828;
-    color: #fff;
-    border: 1px solid #e57373;
-    border-radius: 4px;
-    padding: 6px 12px;
-    font-size: 0.9em;
-}
-
 .btn-backup {
     background: #1565c0;
     color: #fff;
     border: 1px solid #42a5f5;
     border-radius: 4px;
     padding: 12px;
-    font-size: 1.1em;
     width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     cursor: pointer;
-}
-
-.btn-backup-sub {
-    background: #424242;
-    color: #ccc;
-    border: 1px solid #666;
-    border-radius: 4px;
-    padding: 12px;
-    font-size: 1.1em;
-    width: 100%;
-    margin-bottom: 15px;
-    cursor: pointer;
-}
-
-.btn-year-ctrl {
-    padding: 6px 12px;
-    font-size: 0.9em;
-    border-radius: 4px;
-    color: #fff;
-    margin-left: 5px;
-    cursor: pointer;
-}
-
-.bg-green {
-    background: #2e7d32;
-    border: 1px solid #4caf50;
-}
-
-.bg-red {
-    background: #c62828;
-    border: 1px solid #e57373;
-}
-
-.btn-toggle {
-    background: #333;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 4px;
-    width: 34px;
-    height: 34px;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin-left: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .add-row-btn {
@@ -482,196 +482,7 @@ h2 {
     color: #fff;
     border: 1px solid #4caf50;
     border-radius: 4px;
-    font-size: 1.1em;
     cursor: pointer;
-}
-
-input.summary-input {
-    text-align: right;
-    color: #80d8ff;
-    width: 120px;
-    height: 2.5em;
-    font-family: monospace;
-    font-weight: bold;
-    letter-spacing: -0.5px;
-    padding-right: 6px;
-    font-size: 1.3em;
-    background: #333;
-    border: 1px solid #555;
-    border-radius: 4px;
-}
-
-#annual-section {
-    background: #1e1e1e;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #333;
-}
-
-.annual-group {
-    margin-bottom: 30px;
-}
-
-.annual-header {
-    font-weight: bold;
-    color: #fff;
-    border-bottom: 2px solid #2e7d32;
-    margin-bottom: 10px;
-    padding-bottom: 2px;
-    font-size: 1.2em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.year-controls {
-    background: #1f1f1f;
-    padding: 10px;
-    margin: 15px 0;
-    border-radius: 5px;
-    border: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-select {
-    font-size: 1.2em;
-    padding: 5px;
-    background: #333;
-    color: #fff;
-    border: 1px solid #555;
-}
-
-.month-selector {
-    display: flex;
-    overflow-x: auto;
-    background: #000;
-    margin-bottom: 15px;
-    border: 1px solid #333;
-    padding: 5px 0;
-}
-
-.month-btn {
-    flex: 0 0 auto;
-    padding: 12px 18px;
-    color: #888;
-    border-right: 1px solid #222;
-    cursor: pointer;
-}
-
-.month-btn.active {
-    background: #2e7d32;
-    color: #fff;
-    font-weight: bold;
-    border: 1px solid #fff;
-    border-radius: 2px;
-}
-
-.category-block {
-    background: #1e1e1e;
-    padding: 10px;
-    margin-bottom: 25px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    border: 1px solid #333;
-}
-
-.cat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    background: #2c2c2c;
-    padding: 8px;
-    border-radius: 3px;
-    border: 1px solid #444;
-}
-
-.cat-title-input {
-    font-weight: bold;
-    border: none !important;
-    background: transparent !important;
-    font-size: 1.4em;
-    width: 5em;
-    color: #fff;
-    padding: 0;
-}
-
-.summary-area {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    background: #252525;
-    padding: 10px 5px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    border: 1px solid #383838;
-}
-
-.summary-item {
-    display: flex;
-    align-items: center;
-}
-
-.summary-label {
-    font-size: 1.1em;
-    color: #ccc;
-    margin-right: 10px;
-    white-space: nowrap;
-}
-
-.add-block-area {
-    text-align: center;
-    margin-top: 30px;
-    border-top: 1px dashed #444;
-    padding-top: 20px;
-}
-
-.big-btn {
-    background: #2e7d32;
-    color: #fff;
-    padding: 14px 24px;
-    border: 1px solid #4caf50;
-    border-radius: 5px;
-    font-size: 1.1em;
-    margin: 5px;
-    width: 85%;
-    cursor: pointer;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.total-row td {
-    vertical-align: middle;
-}
-
-.total-val-box {
-    background: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 3px;
-    text-align: right;
-    color: #fff;
-    font-weight: bold;
-    font-family: monospace;
-    font-size: 1.05em;
-    padding: 4px;
-    height: 2.0em;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    letter-spacing: -0.5px;
-}
-
-.total-label {
-    text-align: center;
-    font-weight: bold;
-    color: #fff;
-    background: transparent;
-    border: none;
-    font-size: 1.1em;
 }
 
 #sync-status {
@@ -687,77 +498,6 @@ select {
     z-index: 9999;
 }
 
-/* --- ToDo Styles --- */
-.todo-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #333;
-    gap: 12px;
-}
-
-.todo-item:last-child {
-    border-bottom: none;
-}
-
-.todo-check-wrapper {
-    position: relative;
-    width: 24px;
-    height: 24px;
-}
-
-.todo-check-wrapper input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
-}
-
-.todo-checkmark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 24px;
-    height: 24px;
-    background: #333;
-    border: 1px solid #555;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.todo-check-wrapper input:checked~.todo-checkmark {
-    background: #2e7d32;
-    border-color: #4caf50;
-}
-
-.todo-check-wrapper input:checked~.todo-checkmark::after {
-    content: '✔';
-    color: #fff;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-}
-
-.todo-text {
-    flex: 1;
-    font-size: 1.05em;
-    color: #eee;
-    transition: all 0.2s ease;
-}
-
-.todo-text.completed {
-    color: #666;
-    text-decoration: line-through;
-}
-
-.btn-todo-del {
-    background: transparent;
-    border: none;
-    color: #e57373;
-    font-size: 1.2em;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 5px;
+.hidden {
+    display: none !important;
 }
