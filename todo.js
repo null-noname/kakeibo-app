@@ -196,7 +196,7 @@ export function deleteCurrentTodo() {
     const data = window.data;
     if (!data || !editingTodoId) return;
 
-    if (confirm("このToDoごと削除しますか？")) {
+    if (confirm("本当に削除しますか？")) {
         data.todos = data.todos.filter(t => t.id !== editingTodoId);
         if (typeof window.saveData === 'function') window.saveData();
         closeTodoEditor();

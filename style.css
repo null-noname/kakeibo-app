@@ -204,7 +204,8 @@
             font-weight: bold;
             letter-spacing: -0.5px;
             padding-right: 2px;
-            font-size: 1.0em;
+            font-size: 1.2em;
+            /* 1.0 -> 1.2 */
         }
 
         .mini-btn {
@@ -506,7 +507,8 @@
             text-align: right;
             color: #80d8ff;
             width: 120px;
-            height: 2.5em;
+            height: 30px;
+            /* 2.5em -> 30px */
             font-family: monospace;
             font-weight: bold;
             letter-spacing: -0.5px;
@@ -515,6 +517,13 @@
             background: #333;
             border: 1px solid #555;
             border-radius: 4px;
+        }
+
+        .total-label,
+        .total-val-box {
+            font-weight: bold;
+            font-size: 1.15em;
+            color: #fff;
         }
 
         #annual-section {

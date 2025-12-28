@@ -333,7 +333,7 @@ export function moveAnn(k, idx) {
 
 export function delAnn(k, idx) {
     const data = window.data;
-    if (confirm("削除？")) {
+    if (confirm("本当に削除しますか？")) {
         data.years[data.currentYear][k].splice(idx, 1);
         if (typeof window.saveData === 'function') window.saveData(true);
         renderKakeibo();
@@ -361,8 +361,9 @@ export function togBk(bi, m) {
 export function addCategoryBlock(t) {
     const data = window.data;
     const yd = data.years[data.currentYear];
-    const m = yd.activeMonth;
-    data.years[data.currentYear].months[m].push({
+    const m = yd.activeMonth || 1;
+    if (!yd.months[m]) yd.months[m] = [];
+    yd.months[m].push({
         type: t, title: t === 'standard' ? 'リスト1' : 'リスト2', isOpen: true, items: [], balance: 0, deposit: 0
     });
     if (typeof window.saveData === 'function') window.saveData();
@@ -371,7 +372,7 @@ export function addCategoryBlock(t) {
 
 export function delBk(bi, m) {
     const data = window.data;
-    if (confirm("削除？")) {
+    if (confirm("本当に削除しますか？")) {
         data.years[data.currentYear].months[m].splice(bi, 1);
         if (typeof window.saveData === 'function') window.saveData();
         renderKakeibo();
@@ -380,7 +381,8 @@ export function delBk(bi, m) {
 
 export function addIt(bi, m) {
     const data = window.data;
-    const b = data.years[data.currentYear].months[m][bi];
+    const targetMonth = m || data.years[data.currentYear].activeMonth || 1;
+    const b = data.years[data.currentYear].months[targetMonth][bi];
     b.items.push(b.type === 'standard' ? { date: "", name: "", plan: 0, act: 0 } : { date: "", name: "", out: 0, in: 0 });
     if (typeof window.saveData === 'function') window.saveData();
     renderKakeibo();
@@ -388,7 +390,8 @@ export function addIt(bi, m) {
 
 export function moveIt(bi, ii, m, dir) {
     const data = window.data;
-    const l = data.years[data.currentYear].months[m][bi].items;
+    const targetMonth = m || data.years[data.currentYear].activeMonth || 1;
+    const l = data.years[data.currentYear].months[targetMonth][bi].items;
     if (dir === 'up' && ii > 0) [l[ii], l[ii - 1]] = [l[ii - 1], l[ii]];
     if (typeof window.saveData === 'function') window.saveData();
     renderKakeibo();
@@ -396,8 +399,9 @@ export function moveIt(bi, ii, m, dir) {
 
 export function delIt(bi, ii, m) {
     const data = window.data;
-    if (confirm("削除？")) {
-        data.years[data.currentYear].months[m][bi].items.splice(ii, 1);
+    if (confirm("本当に削除しますか？")) {
+        const targetMonth = m || data.years[data.currentYear].activeMonth || 1;
+        data.years[data.currentYear].months[targetMonth][bi].items.splice(ii, 1);
         if (typeof window.saveData === 'function') window.saveData();
         renderKakeibo();
     }
@@ -424,7 +428,7 @@ export function addNewYear() {
 
 export function deleteYear() {
     const data = window.data;
-    if (Object.keys(data.years).length > 1 && confirm("削除？")) {
+    if (Object.keys(data.years).length > 1 && confirm("本当に削除しますか？")) {
         delete data.years[data.currentYear];
         data.currentYear = Object.keys(data.years)[0];
         if (typeof window.saveData === 'function') window.saveData();

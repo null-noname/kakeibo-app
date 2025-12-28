@@ -118,7 +118,7 @@ export function saveCurrentMemo() {
 export function deleteCurrentMemo() {
     const data = window.data;
     if (!data || !editingMemoId) return;
-    if (confirm("削除？")) {
+    if (confirm("本当に削除しますか？")) {
         data.freeMemos = data.freeMemos.filter(m => m.id !== editingMemoId);
         if (typeof window.saveData === 'function') window.saveData();
         closeMemoEditor();
