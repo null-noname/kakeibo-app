@@ -680,3 +680,46 @@
             opacity: 0.7;
             z-index: 9999;
         }
+
+        /* ToDo Editor Styles */
+        #todo-editor {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .todo-item-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .todo-item-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #444;
+            color: #fff;
+            padding: 5px;
+            font-size: 15px;
+        }
+
+        .todo-item-input:focus {
+            outline: none;
+            border-bottom-color: #81c784;
+        }
+
+        .todo-item-input.done {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .todo-check {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #81c784;
+        }

@@ -40,6 +40,12 @@ export function switchView(viewName) {
     if (viewName === 'memo') {
         if (typeof window.renderMemoList === 'function') window.renderMemoList();
     }
+    if (viewName === 'todo') {
+        if (typeof window.renderTodoList === 'function') window.renderTodoList();
+    }
+    if (viewName !== 'todo') {
+        if (typeof window.closeTodoEditor === 'function') window.closeTodoEditor();
+    }
 
     // データ保存
     if (typeof window.saveData === 'function') {

@@ -18,6 +18,7 @@
     <script type="module" src="db.js"></script>
     <script type="module" src="memo.js"></script>
     <script type="module" src="kakeibo.js"></script>
+    <script type="module" src="todo.js"></script>
 </head>
 
 <body>
@@ -64,19 +65,21 @@
 
             <div id="view-todo" class="view-section">
                 <div id="todo-list-view">
-                    <button class="add-row-btn">＋ 新しいToDoを追加</button>
-                    <div id="todo-list-container" style="margin-top:15px;">
-                        <!-- JS実装前のモック表示（指示通りJavaScriptは実装しない） -->
-                        <div class="memo-card">
-                            <div class="memo-card-header">
-                                <span class="memo-card-title">ToDoサンプル</span>
-                                <div class="memo-ctrl-btns">
-                                    <button class="btn-edit-mode">✐ 編集</button>
-                                </div>
-                            </div>
-                            <div class="memo-card-body collapsed">ここにToDoの内容が表示されます。</div>
-                        </div>
+                    <button class="add-row-btn" onclick="addNewTodo()">＋ 新しいToDoを追加</button>
+                    <div id="todo-list-container" style="margin-top:15px;"></div>
+                </div>
+                <!-- ToDoエディタ -->
+                <div id="todo-editor">
+                    <div class="editor-toolbar">
+                        <button class="btn-green" onclick="closeTodoEditor()">＜ 戻る</button>
+                        <button class="btn-red" onclick="deleteCurrentTodo()">削除</button>
                     </div>
+                    <input type="text" id="todo-edit-title" class="memo-title-input" placeholder="ToDoタイトル"
+                        onblur="saveCurrentTodo()">
+                    <div id="todo-items-list" style="margin-top:20px;"></div>
+                    <button class="add-row-btn" onclick="addTodoItem()" style="margin-top:20px;">
+                        ＋ 項目を追加
+                    </button>
                 </div>
             </div>
             <div id="view-fixed" class="view-section">
