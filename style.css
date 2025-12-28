@@ -139,7 +139,7 @@
         }
 
         .col-date {
-            width: 54px;
+            width: 32px;
         }
 
         .col-money {
@@ -147,7 +147,7 @@
         }
 
         .col-btn {
-            width: 34px;
+            width: 32px;
         }
 
         input,
@@ -242,6 +242,15 @@
             border: 1px solid #e57373;
             font-weight: bold;
             border-radius: 3px;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-sizing: border-box;
+            font-size: 0.85em;
+            /* 膨張色対策で文字を少し小さく */
         }
 
         .memo-card {
@@ -474,7 +483,7 @@
             width: 32px;
             height: 30px;
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.1em;
             margin-left: 8px;
             display: inline-flex;
             align-items: center;
