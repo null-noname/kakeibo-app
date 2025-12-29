@@ -672,35 +672,7 @@
             display: none !important;
         }
 
-        .total-row td {
-            vertical-align: middle;
-        }
-
-        .total-val-box {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 3px;
-            text-align: right;
-            color: #fff;
-            font-weight: bold;
-            font-family: monospace;
-            font-size: 1.05em;
-            padding: 4px;
-            height: 2.0em;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            letter-spacing: -0.5px;
-        }
-
-        .total-label {
-            text-align: center;
-            font-weight: bold;
-            color: #fff;
-            background: transparent;
-            border: none;
-            font-size: 1.1em;
-        }
+        /* Consolidated into above definitions */
 
         #sync-status {
             position: fixed;
