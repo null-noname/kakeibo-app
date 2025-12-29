@@ -522,8 +522,10 @@
         .total-label,
         .total-val-box {
             font-weight: bold;
-            font-size: 1.3em; /* 継承を考慮して少し大きく設定 */
-            font-family: monospace; /* 入力欄と統一 */
+            font-size: 1.3em;
+            /* 継承を考慮して少し大きく設定 */
+            font-family: monospace;
+            /* 入力欄と統一 */
             color: #fff;
         }
 
@@ -756,4 +758,52 @@
             height: 20px;
             cursor: pointer;
             accent-color: #81c784;
+        }
+
+        /* --- Mobile Optimization --- */
+        @media screen and (max-width: 480px) {
+            .tab-item {
+                font-size: 0.85em;
+                padding: 0 2px;
+            }
+
+            .tab-item img,
+            .tab-item span {
+                transform: scale(0.9);
+            }
+
+            .col-date {
+                width: 28px;
+            }
+
+            .col-money {
+                width: 62px;
+            }
+
+            .col-btn {
+                width: 26px;
+            }
+
+            .btn-up,
+            .btn-del {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8em;
+            }
+
+            input.money-input {
+                font-size: 1.1em;
+                padding-right: 1px;
+            }
+
+            .total-label,
+            .total-val-box {
+                font-size: 1.1em;
+            }
+
+            textarea.kakeibo-text {
+                font-size: 14px;
+                padding: 4px 1px;
+                min-height: 26px;
+            }
         }
