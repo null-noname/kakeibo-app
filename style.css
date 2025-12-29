@@ -522,7 +522,8 @@
         .total-label,
         .total-val-box {
             font-weight: bold;
-            font-size: 1.2em;
+            font-size: 1.3em; /* 継承を考慮して少し大きく設定 */
+            font-family: monospace; /* 入力欄と統一 */
             color: #fff;
         }
 
