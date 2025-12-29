@@ -47,15 +47,27 @@ auth.onAuthStateChanged((user) => {
 export async function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
+    
+    // スマホ環境やPWAではポップアップがブロックされるため、リダイレクト方式を優先
     try {
-        await auth.signInWithPopup(provider);
+        await auth.signInWithRedirect(provider);
     } catch (error) {
         console.error("Auth Error:", error.code);
-        if (error.code === 'auth/popup-blocked') {
-            alert("ポップアップがブロックされました。ブラウザの設定で許可してください。");
-        }
+        alert("ログインの準備中にエラーが発生しました: " + error.message);
     }
 }
+
+// リダイレクト後の結果を処理
+auth.getRedirectResult().then((result) => {
+    if (result.user) {
+        console.log("Login Success via Redirect");
+    }
+}).catch((error) => {
+    console.error("Redirect Auth Error:", error.code, error.message);
+    if (error.code === 'auth/operation-not-supported-in-this-environment') {
+        alert("このブラウザ環境ではGoogleログインがサポートされていない可能性があります。SafariかChromeをお試しください。");
+    }
+});
 
 /**
  * ログアウトを実行
