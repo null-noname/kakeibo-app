@@ -523,10 +523,30 @@
         .total-val-box {
             font-weight: bold;
             font-size: 1.3em;
-            /* 継承を考慮して少し大きく設定 */
             font-family: monospace;
-            /* 入力欄と統一 */
             color: #fff;
+            display: flex;
+            align-items: center;
+        }
+
+        .total-val-box {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 3px;
+            text-align: right;
+            padding: 4px;
+            height: 30px;
+            justify-content: flex-end;
+            letter-spacing: -0.5px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .total-label {
+            text-align: center;
+            background: transparent;
+            border: none;
+            justify-content: center;
         }
 
         #annual-section {
@@ -693,89 +713,53 @@
             margin-top: 10px;
         }
 
-        .todo-item-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        .todo-item-input {
-            flex: 1;
-            height: 30px;
-            box-sizing: border-box;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid #444;
-            color: #fff;
-            padding: 5px;
-            font-size: 15px;
-        }
-
-        .todo-item-input:focus {
-            outline: none;
-            border-bottom-color: #81c784;
-        }
-
-        .todo-item-input.done {
-            text-decoration: line-through;
-            color: #888;
-        }
-
-        .todo-check {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #81c784;
-        }
-
         /* --- Mobile Optimization --- */
         @media screen and (max-width: 480px) {
             .tab-item {
-                font-size: 0.85em;
-                padding: 0 2px;
+                font-size: 0.8em;
+                padding: 0 1px;
+                letter-spacing: -0.5px;
             }
 
             .tab-item img,
             .tab-item span {
-                transform: scale(0.9);
+                transform: scale(0.85);
             }
 
             .col-date {
-                width: 28px;
+                width: 24px;
             }
 
             .col-money {
-                width: 62px;
+                width: 65px;
             }
 
             .col-btn {
-                width: 26px;
+                width: 24px;
             }
 
             .btn-up,
             .btn-del {
-                width: 26px;
-                height: 26px;
-                font-size: 0.8em;
+                width: 24px;
+                height: 24px;
+                font-size: 0.7em;
             }
 
-            input.money-input {
-                font-size: 1.1em;
+            input.money-input,
+            .total-val-box {
+                font-size: 1.0em;
+                /* Ensure all fit on one line */
                 padding-right: 1px;
             }
 
-            .total-label,
-            .total-val-box {
-                font-size: 1.1em;
+            .total-label {
+                font-size: 0.85em;
             }
 
             textarea.kakeibo-text {
                 font-size: 14px;
                 padding: 4px 1px;
-                min-height: 26px;
+                min-height: 24px;
+                line-height: 1.25em;
             }
         }
