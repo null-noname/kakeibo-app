@@ -142,6 +142,10 @@
             width: 32px;
         }
 
+        #annual-section .col-date {
+            width: 60px;
+        }
+
         .col-money {
             width: 70px;
         }
@@ -530,8 +534,8 @@
         }
 
         .total-val-box {
-            background: #2a2a2a;
-            border: 1px solid #444;
+            background: transparent !important;
+            border: none !important;
             border-radius: 3px;
             text-align: right;
             padding: 4px;
@@ -713,10 +717,10 @@
             margin-top: 10px;
         }
 
-        /* --- Ultra-Slim Mobile Optimization (for screens <= 600px) --- */
+        /* --- Optimized Mobile Layout (for screens <= 600px) --- */
         @media screen and (max-width: 600px) {
             .tab-item {
-                font-size: 0.82em;
+                font-size: 0.9em;
                 padding: 0 1px;
                 letter-spacing: -0.5px;
                 white-space: nowrap;
@@ -724,13 +728,18 @@
 
             .tab-item img,
             .tab-item span {
-                transform: scale(0.85);
+                transform: scale(0.9);
             }
 
             .col-date {
                 width: 22px;
             }
 
+            #annual-section .col-date {
+                width: 60px;
+            }
+
+            /* Support "12/31" */
             .col-money {
                 width: 82px;
             }
@@ -750,21 +759,21 @@
 
             input.money-input,
             .total-val-box {
-                font-size: 1.05em;
+                font-size: 1.15em;
                 padding-right: 1px;
             }
 
             .total-val-box {
-                background: transparent;
-                border: none;
+                background: transparent !important;
+                border: none !important;
             }
 
             .total-label {
-                font-size: 0.85em;
+                font-size: 0.9em;
             }
 
             textarea.kakeibo-text {
-                font-size: 13.5px;
+                font-size: 14px;
                 padding: 4px 1px;
                 min-height: 22px;
                 line-height: 1.25em;

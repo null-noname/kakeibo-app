@@ -299,6 +299,9 @@ export function createMon(v, cb, bCb, isBig) {
     i.onfocus = function () { this.value = this.value.replace(/,/g, ''); this.select(); };
     i.onblur = function () {
         let n = parseInt(this.value.replace(/[^0-9\-]/g, '')) || 0;
+        // Clamp value between -999,999 and 999,999
+        if (n > 999999) n = 999999;
+        if (n < -999999) n = -999999;
         cb(n);
         this.value = n ? n.toLocaleString() : "";
         if (bCb) bCb();
