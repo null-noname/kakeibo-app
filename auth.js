@@ -48,18 +48,25 @@ export async function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
-    // スマホ環境やPWAではポップアップがブロックされるため、リダイレクト方式を優先
+    // デスクトップ環境ではポップアップ方式、モバイル/PWAではリダイレクト方式を使い分け
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     try {
-        await auth.signInWithRedirect(provider);
+        if (!isMobile) {
+            await auth.signInWithPopup(provider);
+        } else {
+            await auth.signInWithRedirect(provider);
+        }
     } catch (error) {
         console.error("Auth Error:", error.code);
-        alert("ログインの準備中にエラーが発生しました: " + error.message);
+        alert("ログイン中にエラーが発生しました: " + error.message);
     }
 }
 
 // リダイレクト後の結果を処理
 auth.getRedirectResult().then((result) => {
-    if (result.user) {
+    // result が null (通常のページ読み込み時) の場合を考慮
+    if (result && result.user) {
         console.log("Login Success via Redirect");
     }
 }).catch((error) => {
