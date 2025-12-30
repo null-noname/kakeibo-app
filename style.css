@@ -10,6 +10,8 @@
             padding-bottom: 50px;
             padding-top: calc(90px + env(safe-area-inset-top));
             user-select: none;
+            /* FINGERPRINT: これが見えたら私の編集したファイルが読み込まれています */
+            border: 5px solid red !important;
         }
 
         #login-screen {
@@ -713,42 +715,44 @@
             margin-top: 10px;
         }
 
-        /* --- Mobile Optimization --- */
-        @media screen and (max-width: 480px) {
+        /* --- Ultra-Slim Mobile Optimization (for screens <= 600px) --- */
+        @media screen and (max-width: 600px) {
             .tab-item {
-                font-size: 0.8em;
+                font-size: 0.75em;
                 padding: 0 1px;
                 letter-spacing: -0.5px;
+                white-space: nowrap;
             }
 
             .tab-item img,
             .tab-item span {
-                transform: scale(0.85);
+                transform: scale(0.8);
             }
 
             .col-date {
-                width: 24px;
+                width: 22px;
             }
 
             .col-money {
-                width: 65px;
+                width: 82px;
             }
 
+            /* Ensure -999,999 fits perfectly */
             .col-btn {
-                width: 24px;
+                width: 21px;
             }
 
             .btn-up,
             .btn-del {
-                width: 24px;
-                height: 24px;
+                width: 20px;
+                height: 20px;
                 font-size: 0.7em;
+                border-radius: 2px;
             }
 
             input.money-input,
             .total-val-box {
-                font-size: 1.0em;
-                /* Ensure all fit on one line */
+                font-size: 0.95em;
                 padding-right: 1px;
             }
 
@@ -757,9 +761,9 @@
             }
 
             textarea.kakeibo-text {
-                font-size: 14px;
+                font-size: 13.5px;
                 padding: 4px 1px;
-                min-height: 24px;
+                min-height: 22px;
                 line-height: 1.25em;
             }
         }
