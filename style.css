@@ -721,11 +721,11 @@
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            margin-bottom: 12px;
-            background: #252525;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #333;
+            margin-bottom: 8px;
+            /* Slightly tighter without the box */
+            background: transparent;
+            padding: 4px 0;
+            border: none;
         }
 
         .todo-check {
@@ -782,17 +782,33 @@
                 width: 82px;
             }
 
-            /* Ensure -999,999 fits perfectly */
-            .col-btn {
-                width: 21px;
-            }
-
+            /* --- Hybrid Button Sizes --- */
+            /* Default: Return to 30px for ToDo, Memo, and Kakeibo Delete */
             .btn-up,
             .btn-del {
+                width: 32px;
+                height: 30px;
+                font-size: 0.85em;
+                border-radius: 4px;
+            }
+
+            /* Small Exception: Movement buttons in Kakeibo and all buttons in Fixed Assets */
+            #view-kakeibo .btn-up,
+            #annual-section .btn-up,
+            #annual-section .btn-del {
                 width: 20px;
                 height: 20px;
                 font-size: 0.7em;
                 border-radius: 2px;
+            }
+
+            .col-btn {
+                width: 32px;
+            }
+
+            #view-kakeibo .col-btn:first-of-type {
+                /* Only the ▲ column */
+                width: 21px;
             }
 
             input.money-input,
