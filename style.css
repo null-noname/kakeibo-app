@@ -10,8 +10,6 @@
             padding-bottom: 50px;
             padding-top: calc(90px + env(safe-area-inset-top));
             user-select: none;
-            /* FINGERPRINT: これが見えたら私の編集したファイルが読み込まれています */
-            border: 5px solid red !important;
         }
 
         #login-screen {
@@ -718,7 +716,7 @@
         /* --- Ultra-Slim Mobile Optimization (for screens <= 600px) --- */
         @media screen and (max-width: 600px) {
             .tab-item {
-                font-size: 0.75em;
+                font-size: 0.82em;
                 padding: 0 1px;
                 letter-spacing: -0.5px;
                 white-space: nowrap;
@@ -726,7 +724,7 @@
 
             .tab-item img,
             .tab-item span {
-                transform: scale(0.8);
+                transform: scale(0.85);
             }
 
             .col-date {
@@ -752,8 +750,13 @@
 
             input.money-input,
             .total-val-box {
-                font-size: 0.95em;
+                font-size: 1.05em;
                 padding-right: 1px;
+            }
+
+            .total-val-box {
+                background: transparent;
+                border: none;
             }
 
             .total-label {
