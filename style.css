@@ -717,6 +717,44 @@
             margin-top: 10px;
         }
 
+        .todo-item-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            background: #252525;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .todo-check {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #4caf50;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .todo-item-input {
+            flex: 1;
+            background: transparent !important;
+            border: none !important;
+            color: #fff;
+            font-size: 1.1em;
+            resize: none;
+            overflow: hidden;
+            padding: 2px 0;
+            line-height: 1.4em;
+            min-height: 24px;
+        }
+
+        .todo-item-input.done {
+            text-decoration: line-through;
+            color: #888 !important;
+        }
+
         /* --- Optimized Mobile Layout (for screens <= 600px) --- */
         @media screen and (max-width: 600px) {
             .tab-item {

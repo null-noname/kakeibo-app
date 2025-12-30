@@ -105,11 +105,20 @@ export function renderTodoItems() {
 
         itemDiv.innerHTML = `
             <input type="checkbox" class="todo-check" ${item.done ? 'checked' : ''} onchange="updateItemDone(${index}, this.checked)">
-            <input type="text" class="todo-item-input ${item.done ? 'done' : ''}" value="${item.text}" 
-                   onblur="updateItemText(${index}, this.value)" placeholder="内容を入力...">
-            <button class="btn-red" style="padding:5px 10px;" onclick="deleteTodoItem(${index})">×</button>
+            <textarea class="todo-item-input ${item.done ? 'done' : ''}" 
+                      onblur="updateItemText(${index}, this.value)" 
+                      oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+                      placeholder="内容を入力..." rows="1">${item.text}</textarea>
+            <button class="btn-red" style="padding:5px 10px; flex-shrink:0;" onclick="deleteTodoItem(${index})">×</button>
         `;
         listContainer.appendChild(itemDiv);
+
+        // 初期高さ調整
+        const ta = itemDiv.querySelector('textarea');
+        setTimeout(() => {
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+        }, 0);
     });
 }
 
