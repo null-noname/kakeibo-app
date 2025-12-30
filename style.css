@@ -783,7 +783,7 @@
             }
 
             /* --- Hybrid Button Sizes --- */
-            /* Default: Return to 30px for ToDo, Memo, and Kakeibo Delete */
+            /* Default: Return to 30px for ToDo, Memo */
             .btn-up,
             .btn-del {
                 width: 32px;
@@ -792,8 +792,9 @@
                 border-radius: 4px;
             }
 
-            /* Small Exception: Movement buttons in Kakeibo and all buttons in Fixed Assets */
+            /* Small Exception: All buttons in Kakeibo and Fixed Assets */
             #view-kakeibo .btn-up,
+            #view-kakeibo .btn-del,
             #annual-section .btn-up,
             #annual-section .btn-del {
                 width: 20px;
@@ -803,13 +804,11 @@
             }
 
             .col-btn {
-                width: 32px;
+                width: 21px !important;
+                /* Tight fit for all small buttons */
             }
 
-            #view-kakeibo .col-btn:first-of-type {
-                /* Only the ▲ column */
-                width: 21px;
-            }
+            /* Restore width for ToDo items which use flex, not tables, so col-btn won't affect it much but just in case */
 
             input.money-input,
             .total-val-box {
