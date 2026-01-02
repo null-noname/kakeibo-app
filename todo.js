@@ -28,7 +28,7 @@ export function renderTodoList() {
                 </div>
             </div>
             <div class="memo-card-body ${todo.isOpen ? "" : "collapsed"}">
-                ${(todo.items || []).map(it => `<div style="display:flex; align-items:center; gap:5px; margin-bottom:3px;">
+                ${(todo.items || []).map((it, idx) => `<div style="display:flex; align-items:center; gap:5px; margin-bottom:3px; cursor:pointer;" onclick="toggleItemDone('${todo.id}', ${idx})">
                     <span>${it.done ? "✅" : "⬜"}</span>
                     <span style="${it.done ? 'text-decoration:line-through; color:#888;' : ''}">${it.text}</span>
                 </div>`).join("")}
@@ -104,7 +104,7 @@ export function renderTodoItems() {
         itemDiv.className = 'todo-item-row';
 
         itemDiv.innerHTML = `
-            <input type="checkbox" class="todo-check" ${item.done ? 'checked' : ''} onchange="updateItemDone(${index}, this.checked)">
+            <div class="drag-handle" style="cursor:grab; padding:5px; color:#666;">⠿</div>
             <textarea class="todo-item-input ${item.done ? 'done' : ''}" 
                       onblur="updateItemText(${index}, this.value)" 
                       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
@@ -119,6 +119,35 @@ export function renderTodoItems() {
             ta.style.height = 'auto';
             ta.style.height = ta.scrollHeight + 'px';
         }, 0);
+    });
+
+    // 並び替えの初期化
+    initTodoSortable();
+}
+
+/**
+ * 並び替え機能の初期化
+ */
+function initTodoSortable() {
+    const listContainer = document.getElementById('todo-items-list');
+    if (!listContainer || typeof Sortable === 'undefined') return;
+
+    // 既存のインスタンスがあれば破棄（二重登録防止）
+    if (listContainer._sortable) listContainer._sortable.destroy();
+
+    listContainer._sortable = new Sortable(listContainer, {
+        handle: '.drag-handle',
+        animation: 150,
+        onEnd: (evt) => {
+            const data = window.data;
+            const todo = data.todos.find(t => t.id === editingTodoId);
+            if (todo && todo.items) {
+                const item = todo.items.splice(evt.oldIndex, 1)[0];
+                todo.items.splice(evt.newIndex, 0, item);
+                saveCurrentTodo();
+                renderTodoItems(); // インデックスがずれるのを防ぐために再描画
+            }
+        }
     });
 }
 
@@ -240,6 +269,20 @@ export function toggleTodo(id) {
     }
 }
 
+/**
+ * 閲覧モードでの項目チェック切り替え
+ */
+export function toggleItemDone(todoId, itemIndex) {
+    const data = window.data;
+    if (!data || !data.todos) return;
+    const todo = data.todos.find(t => t.id === todoId);
+    if (todo && todo.items && todo.items[itemIndex]) {
+        todo.items[itemIndex].done = !todo.items[itemIndex].done;
+        if (typeof window.saveData === 'function') window.saveData();
+        renderTodoList();
+    }
+}
+
 // グローバル登録 (外部HTMLおよび onclick からの呼び出し用)
 window.renderTodoList = renderTodoList;
 window.addNewTodo = addNewTodo;
@@ -252,3 +295,4 @@ window.deleteCurrentTodo = deleteCurrentTodo;
 window.toggleTodo = toggleTodo;
 window.renderTodoItems = renderTodoItems;
 window.moveTodo = moveTodo;
+window.toggleItemDone = toggleItemDone;

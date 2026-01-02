@@ -755,6 +755,19 @@
             color: #888 !important;
         }
 
+        /* Drag & Drop Styles */
+        .drag-handle {
+            font-size: 1.4em;
+            padding: 5px 10px !important;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #2e7d32 !important;
+        }
+
         /* --- Optimized Mobile Layout (for screens <= 600px) --- */
         @media screen and (max-width: 600px) {
             .tab-item {
