@@ -28,8 +28,8 @@ export function renderTodoList() {
                 </div>
             </div>
             <div class="memo-card-body ${todo.isOpen ? "" : "collapsed"}">
-                ${(todo.items || []).map((it, idx) => `<div style="display:flex; align-items:center; gap:5px; margin-bottom:3px; cursor:pointer;" onclick="toggleItemDone('${todo.id}', ${idx})">
-                    <span>${it.done ? "✅" : "⬜"}</span>
+                ${(todo.items || []).map((it, idx) => `<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer;" onclick="toggleItemDone('${todo.id}', ${idx})">
+                    <span class="custom-check ${it.done ? 'checked' : ''}"></span>
                     <span style="${it.done ? 'text-decoration:line-through; color:#888;' : ''}">${it.text}</span>
                 </div>`).join("")}
             </div>
